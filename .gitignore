@@ -1,0 +1,106 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# VIRTUAL ENVIRONMENTS
+venv/
+.env/
+.venv/
+
+# ENVIRONMENT VARIABLES
+.env
+.env.*
+ENV
+.venv
+venv
+*.sh
+
+# uv
+.uv/
+
+# Logs
+*.log
+
+# FLASK FILES
+instance/
+.webassets-cache
+
+# TESTING / COVERAGE / TEMP
+.coverage
+htmlcov/
+.pytest_cache/
+tmp/
+temp/
+
+# DISTRIBUTION
+build/
+dist/
+*.egg-info/
+
+# DEPENDENCIES
+node_modules/
+
+# BUILD
+build/
+dist/
+bin/
+obj/
+
+# LOGS
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.log
+
+# CACHE
+.cache
+
+# USER / ID
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# PACKAGES
+*.nupkg
+packages/
+
+# VS CODE / VS
+.vscode/
+.idea/
+.vs/
+
+# AZURE PUBLISH
+*.PublishSettings
+*.azurePubxml
+*.pubxml
+*.publishproj
+
+# SQL SERVER
+*.mdf
+*.ldf
+
+# DATA TOOLS
+*.dacpac
+*.bacpac
+
+# SECRETS
+secrets.json
+appsettings.*.json
+!appsettings.example.json
+
+# KEYS
+*.pem
+*.key
+*.pfx
+
+# CERTIFICATES
+*.crt
+
+# OS FILES
+.DS_Store
+Thumbs.db
+
+# EDITOR BACKUPS
+*.swp

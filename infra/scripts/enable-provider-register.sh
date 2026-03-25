@@ -24,7 +24,6 @@ az provider register --namespace Microsoft.CognitiveServices
 az provider register --namespace Microsoft.MachineLearningServices
 
 # Mensajería y comunicación | Messaging and communication
-az provider register --namespace Microsoft.WebPubSub
 az provider register --namespace Microsoft.SignalRService
 az provider register --namespace Microsoft.EventGrid
 

@@ -14,7 +14,7 @@ venv/
 ENV
 .venv
 venv
-*.sh
+set*.sh
 
 # uv
 .uv/

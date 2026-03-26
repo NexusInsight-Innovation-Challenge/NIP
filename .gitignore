@@ -1,3 +1,4 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 # Byte-compiled / cache
 __pycache__/
 *.py[cod]
@@ -40,6 +41,14 @@ dist/
 
 # DEPENDENCIES
 node_modules/
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
 
 # BUILD
 build/
@@ -51,6 +60,7 @@ obj/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.pnpm-debug.log*
 .log
 
 # CACHE
@@ -70,6 +80,7 @@ packages/
 .vscode/
 .idea/
 .vs/
+.ruff_cache/
 
 # AZURE PUBLISH
 *.PublishSettings
@@ -104,3 +115,14 @@ Thumbs.db
 
 # EDITOR BACKUPS
 *.swp
+
+# NEXT.JS
+/.next/
+/out/
+
+# VERCEL
+.vercel
+
+# TYPESCRIPT
+*.tsbuildinfo
+next-env.d.ts

@@ -1,4 +1,4 @@
-[Versón español](./README.md)
+[Versión español](./README.md)
 # Nexus Insight
 
 ### The key to addressing the problem and implementing the solution.

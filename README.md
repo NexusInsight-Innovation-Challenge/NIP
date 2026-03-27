@@ -8,7 +8,8 @@
 ---
 
 ### ✨ Arquitectura de Innovación: Paradigma MAC-SQL
-El sistema divide la carga cognitiva en cuatro agentes operativos para optimizar el rendimiento:
+En lugar de basarse en una única indicación todopoderosa, **Nexus Insight** orquesta un equipo especializado de agentes operativos inteligentes. Esta metodología se basa teóricamente en el **[Marco MAC-SQL (arXiv:2312.11242)](https://arxiv.org/abs/2312.11242)**, que divide la carga cognitiva y colabora dinámicamente para superar los límites de contexto y los obstáculos de alucinación inherentes a los modelos monolíticos. El sistema divide la carga cognitiva en cuatro agentes operativos para optimizar el rendimiento:
+
 * **Planner:** Actúa como enrutador inteligente para evitar procesos innecesarios en consultas no relacionadas con SQL.
 * **Librarian:** Filtra esquemas de tablas relevantes y utiliza una caché en Redis (TTL de 300s) para minimizar la latencia.
 * **Critic & Executor:** Un filtro de seguridad "Zero-Trust" que bloquea comandos peligrosos (DDL/DML) y realiza corrección automática de errores sintácticos.

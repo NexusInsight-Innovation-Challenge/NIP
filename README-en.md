@@ -8,7 +8,8 @@
 ---
 
 ### ✨ Innovative Architecture: The MAC-SQL Paradigm
-The system distributes the cognitive load across four operational agents to optimize performance:
+Rather than relying on a single omnipotent prompt, **Nexus Insight** orchestrates a specialized team of intelligent operational agents. This methodology is theoretically grounded in the **[MAC-SQL Framework (arXiv:2312.11242)](https://arxiv.org/abs/2312.11242)**, which divides the cognitive load and dynamically collaborates to overcome the context limits and hallucination obstacles inherent in monolithic models. The system distributes the cognitive load across four operational agents to optimize performance:
+
 * **Planner:** Acts as a smart router to bypass unnecessary processing for non-SQL-related queries.
 * **Librarian:** Filters relevant table schemas and utilizes a Redis cache (300s TTL) to minimize latency.
 * **Critic & Executor:** A "Zero-Trust" security firewall that blocks dangerous commands (DDL/DML) and performs automatic syntax error correction.

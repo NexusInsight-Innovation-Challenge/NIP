@@ -1,0 +1,275 @@
+{
+  "dataset": "synthetic_v1",
+  "query_count": 8,
+  "variants": {
+    "A": {
+      "results": [
+        {
+          "case_id": "q1",
+          "latency_ms": 2440,
+          "tokens": 1760,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q2",
+          "latency_ms": 3080,
+          "tokens": 2120,
+          "syntax_valid": true,
+          "accuracy_pass": false,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q3",
+          "latency_ms": 3080,
+          "tokens": 2120,
+          "syntax_valid": true,
+          "accuracy_pass": false,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q4",
+          "latency_ms": 2120,
+          "tokens": 1580,
+          "syntax_valid": false,
+          "accuracy_pass": false,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q5",
+          "latency_ms": 3400,
+          "tokens": 2300,
+          "syntax_valid": false,
+          "accuracy_pass": false,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q6",
+          "latency_ms": 2760,
+          "tokens": 1940,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q7",
+          "latency_ms": 2440,
+          "tokens": 1760,
+          "syntax_valid": false,
+          "accuracy_pass": false,
+          "security_blocked": true,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q8",
+          "latency_ms": 2760,
+          "tokens": 1940,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        }
+      ],
+      "kpis": {
+        "queries": 8,
+        "latency_p50_ms": 2760,
+        "latency_p95_ms": 3400,
+        "latency_p99_ms": 3400,
+        "avg_tokens": 1940,
+        "syntax_validity_rate": 0.625,
+        "execution_accuracy_rate": 0.375,
+        "security_block_rate": 0.5,
+        "fast_track_hit_rate": 0.0
+      }
+    },
+    "B": {
+      "results": [
+        {
+          "case_id": "q1",
+          "latency_ms": 1780,
+          "tokens": 1360,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q2",
+          "latency_ms": 2260,
+          "tokens": 1620,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q3",
+          "latency_ms": 2260,
+          "tokens": 1620,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q4",
+          "latency_ms": 1540,
+          "tokens": 1230,
+          "syntax_valid": false,
+          "accuracy_pass": false,
+          "security_blocked": true,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q5",
+          "latency_ms": 2500,
+          "tokens": 1750,
+          "syntax_valid": true,
+          "accuracy_pass": false,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q6",
+          "latency_ms": 2020,
+          "tokens": 1490,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q7",
+          "latency_ms": 1780,
+          "tokens": 1360,
+          "syntax_valid": false,
+          "accuracy_pass": false,
+          "security_blocked": true,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q8",
+          "latency_ms": 2020,
+          "tokens": 1490,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        }
+      ],
+      "kpis": {
+        "queries": 8,
+        "latency_p50_ms": 2020,
+        "latency_p95_ms": 2500,
+        "latency_p99_ms": 2500,
+        "avg_tokens": 1490,
+        "syntax_validity_rate": 0.75,
+        "execution_accuracy_rate": 0.625,
+        "security_block_rate": 1.0,
+        "fast_track_hit_rate": 0.0
+      }
+    },
+    "C": {
+      "results": [
+        {
+          "case_id": "q1",
+          "latency_ms": 360,
+          "tokens": 240,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": true
+        },
+        {
+          "case_id": "q2",
+          "latency_ms": 1890,
+          "tokens": 1380,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q3",
+          "latency_ms": 440,
+          "tokens": 300,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": true
+        },
+        {
+          "case_id": "q4",
+          "latency_ms": 1260,
+          "tokens": 1020,
+          "syntax_valid": false,
+          "accuracy_pass": false,
+          "security_blocked": true,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q5",
+          "latency_ms": 2100,
+          "tokens": 1500,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q6",
+          "latency_ms": 400,
+          "tokens": 270,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": true
+        },
+        {
+          "case_id": "q7",
+          "latency_ms": 1470,
+          "tokens": 1140,
+          "syntax_valid": false,
+          "accuracy_pass": false,
+          "security_blocked": true,
+          "fast_track_hit": false
+        },
+        {
+          "case_id": "q8",
+          "latency_ms": 1680,
+          "tokens": 1260,
+          "syntax_valid": true,
+          "accuracy_pass": true,
+          "security_blocked": false,
+          "fast_track_hit": false
+        }
+      ],
+      "kpis": {
+        "queries": 8,
+        "latency_p50_ms": 1365,
+        "latency_p95_ms": 2100,
+        "latency_p99_ms": 2100,
+        "avg_tokens": 888,
+        "syntax_validity_rate": 0.75,
+        "execution_accuracy_rate": 0.75,
+        "security_block_rate": 1.0,
+        "fast_track_hit_rate": 0.375
+      }
+    }
+  },
+  "comparison": {
+    "latency_p50_reduction_vs_A": 0.5054,
+    "avg_tokens_reduction_vs_A": 0.5423
+  },
+  "notes": [
+    "Synthetic benchmark for reproducible baseline during hackathon build phase.",
+    "Replace simulator with live Azure SQL + agent telemetry in Phase 3."
+  ]
+}

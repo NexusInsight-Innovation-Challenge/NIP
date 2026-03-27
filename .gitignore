@@ -16,6 +16,7 @@ ENV
 .venv
 venv
 set*.sh
+!.env.example
 
 # uv
 .uv/

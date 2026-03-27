@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SQLAgentX | One Pager Técnico-Comercial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    @font-face { font-family: 'Segoe UI Variable Display'; src: local('Segoe UI Variable Display'), local('Segoe UI'); }
+
+    :root {
+      --az-blue: #0078D4; --az-teal: #008272; --az-purple: #5C2D91;
+      --az-green: #7FBA00; --az-orange: #D83B01; --az-red: #E81123;
+      --az-monitor: #B26B00; --az-sql: #00A4EF; --az-kv: #B4009E;
+      --ms-powerbi: #F2C811; --ms-office: #D83B01;
+      --ms-bg-light: #FAFAFA; --ms-surface: #FFFFFF; --ms-border: #E1DFDD;
+      --ms-text-main: #201F1E; --ms-text-muted: #605E5C;
+      --copilot-gradient: linear-gradient(110deg, #1094D2, #6C35D4, #C62287);
+      --fluent-shadow: 0 1.6px 3.6px 0 rgba(0,0,0,0.132), 0 0.3px 0.9px 0 rgba(0,0,0,0.108);
+      --fluent-shadow-hover: 0 6.4px 14.4px 0 rgba(0,0,0,0.132), 0 1.2px 3.6px 0 rgba(0,0,0,0.108);
+    }
+
+    body {
+      font-family: 'Segoe UI Variable Display', -apple-system, sans-serif;
+      background-color: var(--ms-bg-light);
+      color: var(--ms-text-main);
+      overflow-x: hidden;
+    }
+
+    .nav-glass {
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--ms-border);
+    }
+
+    .tab-content { display: none; opacity: 0; transition: opacity 0.3s ease; }
+    .tab-content.active { display: block; opacity: 1; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+    .tab-link {
+      position: relative;
+      color: var(--ms-text-muted);
+      font-weight: 500;
+      padding: 1rem 0;
+      margin: 0 .75rem;
+      transition: color .2s;
+      cursor: pointer;
+      font-size: .95rem;
+      background: transparent;
+      border: none;
+    }
+    .tab-link:hover { color: var(--ms-text-main); }
+    .tab-link.active { color: var(--az-blue); font-weight: 600; }
+    .tab-link.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--az-blue);
+      border-radius: 3px 3px 0 0;
+    }
+
+    .ai-text {
+      background: var(--copilot-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .fluent-card {
+      background: var(--ms-surface);
+      border: 1px solid var(--ms-border);
+      border-radius: 10px;
+      box-shadow: var(--fluent-shadow);
+      transition: all .2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fluent-card:hover {
+      box-shadow: var(--fluent-shadow-hover);
+      transform: translateY(-2px);
+    }
+
+    .metric { border-left: 4px solid var(--az-blue); }
+    .badge-ok { background: #dff6dd; color: #0f6c0f; }
+    .badge-partial { background: #fff4ce; color: #8a6100; }
+    .badge-roadmap { background: #f3f2f1; color: #605e5c; }
+
+    .az-viewport {
+      background: #11100F;
+      border-radius: 12px;
+      position: relative;
+      width: 100%;
+      height: clamp(520px, 72vh, 820px);
+      overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0,0,0,.9);
+      cursor: grab;
+      border: 1px solid #323130;
+    }
+    .az-viewport:active { cursor: grabbing; }
+
+    .az-canvas-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2000px;
+      height: 1200px;
+      transform-origin: 0 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      transition: transform .1s ease-out;
+      will-change: transform;
+    }
+
+    @media (max-width: 1024px) {
+      .az-viewport { height: clamp(460px, 68vh, 700px); }
+    }
+
+    .az-boundary {
+      position: absolute;
+      border: 2px dashed #484644;
+      border-radius: 8px;
+      background: rgba(255,255,255,.01);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .boundary-label {
+      position: absolute;
+      top: -12px;
+      left: 20px;
+      background: #11100F;
+      padding: 0 10px;
+      color: #a19f9d;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .az-node {
+      position: absolute;
+      background: #252423;
+      border: 1px solid #3b3a39;
+      border-radius: 6px;
+      color: #fff;
+      padding: 14px;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,.6);
+      cursor: pointer;
+      transition: all .2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .az-node:hover {
+      border-color: var(--az-blue);
+      transform: translateY(-3px);
+      z-index: 20;
+      box-shadow: 0 10px 20px rgba(0,120,212,.22);
+    }
+
+    .az-node-header { display: flex; align-items: center; margin-bottom: 8px; border-bottom: 1px solid #3b3a39; padding-bottom: 8px; }
+    .az-node-icon {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 4px;
+      margin-right: 12px;
+      font-size: 14px;
+    }
+
+    .n-blue { border-left: 4px solid var(--az-blue); }
+    .n-teal { border-left: 4px solid var(--az-teal); }
+    .n-purple { border-left: 4px solid var(--az-purple); }
+    .n-red { border-left: 4px solid var(--az-red); }
+    .n-monitor { border-left: 4px solid var(--az-monitor); }
+    .n-sql { border-left: 4px solid var(--az-sql); }
+    .n-office { border-left: 4px solid var(--ms-office); }
+
+    .n-ai-core {
+      position: relative;
+      border-radius: 8px;
+      border: 1px solid #484644;
+    }
+    .n-ai-core::before {
+      content: '';
+      position: absolute;
+      inset: -2px;
+      z-index: -1;
+      background: var(--copilot-gradient);
+      border-radius: 10px;
+      opacity: .7;
+      animation: pulse-glow 3s infinite alternate;
+    }
+
+    @keyframes pulse-glow {
+      0% { opacity: .5; filter: blur(3px); }
+      100% { opacity: 1; filter: blur(6px); }
+    }
+
+    .svg-pipeline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+    .path-bg { fill: none; stroke: #323130; stroke-width: 2; }
+    .path-data { fill: none; stroke: var(--az-blue); stroke-width: 2.5; stroke-dasharray: 6 8; animation: flow 1s linear infinite; }
+    .path-ai { fill: none; stroke: #C62287; stroke-width: 2.5; stroke-dasharray: 6 8; animation: flow 1.2s linear infinite; }
+    .path-event { fill: none; stroke: var(--az-teal); stroke-width: 2.5; stroke-dasharray: 8 8; animation: flow 1s linear infinite; }
+    .path-alert { fill: none; stroke: var(--az-red); stroke-width: 2.2; stroke-dasharray: 4 5; animation: flow-reverse .9s linear infinite; }
+    .path-tel { fill: none; stroke: var(--az-monitor); stroke-width: 1.8; stroke-dasharray: 3 5; animation: flow 1.8s linear infinite; }
+
+    @keyframes flow { to { stroke-dashoffset: -20; } }
+    @keyframes flow-reverse { to { stroke-dashoffset: 20; } }
+
+    .canvas-controls {
+      position: absolute;
+      bottom: 24px;
+      right: 24px;
+      z-index: 30;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: rgba(17,16,15,.8);
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #3b3a39;
+      backdrop-filter: blur(10px);
+    }
+
+    .canvas-btn {
+      background: #252423;
+      color: #a19f9d;
+      border: 1px solid #484644;
+      width: 32px;
+      height: 32px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all .2s;
+    }
+    .canvas-btn:hover { background: var(--az-blue); color: white; border-color: var(--az-blue); }
+
+    .blade-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.5);
+      backdrop-filter: blur(3px);
+      z-index: 90;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s;
+    }
+    .blade-overlay.active { opacity: 1; pointer-events: auto; }
+
+    .blade-panel {
+      position: fixed;
+      top: 0;
+      right: -860px;
+      width: 100%;
+      max-width: 820px;
+      height: 100vh;
+      background: var(--ms-surface);
+      box-shadow: -10px 0 30px rgba(0,0,0,.2);
+      z-index: 100;
+      transition: right .4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+    }
+    .blade-panel.active { right: 0; }
+
+    .blade-header {
+      padding: 1.5rem 2rem;
+      border-bottom: 1px solid var(--ms-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      background: var(--ms-bg-light);
+    }
+
+    .blade-body { padding: 2rem; overflow-y: auto; flex-grow: 1; }
+
+    .ado-tag {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+    }
+
+    .mini-table th, .mini-table td { padding: .55rem .65rem; border-bottom: 1px solid #ecebea; font-size: .8rem; }
+    .mini-table th { text-align: left; color: #605e5c; font-weight: 600; background: #fafafa; }
+  </style>
+</head>
+<body>
+  <header class="nav-glass sticky top-0 z-50 shadow-sm">
+    <div class="container mx-auto px-6">
+      <div class="flex items-center justify-between h-16">
+        <div class="flex items-center space-x-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 21 21"><path fill="#f25022" d="M0 0h10v10H0z"/><path fill="#7fba00" d="M11 0h10v10H11z"/><path fill="#00a4ef" d="M0 11h10v10H0z"/><path fill="#ffb900" d="M11 11h10v10H11z"/></svg>
+          <span class="text-xl font-semibold tracking-tight">SQL <span class="ai-text font-bold">AgentX</span></span>
+          <span class="hidden md:inline text-xs text-[#605E5C] border border-[#E1DFDD] rounded-full px-2 py-1">One Pager técnico-comercial</span>
+        </div>
+        <nav class="hidden md:flex h-full">
+          <button onclick="switchTab('exec-brief', this)" class="tab-link active">Ecosistema & Valor</button>
+          <button onclick="switchTab('optimization', this)" class="tab-link">Flujo de Agentes</button>
+          <button onclick="switchTab('architecture', this)" class="tab-link">Arquitectura (Canvas)</button>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main class="container mx-auto px-6 py-8">
+
+    <section id="exec-brief" class="tab-content active">
+      <div class="relative bg-white rounded-2xl p-8 lg:p-10 shadow-xl border border-[#E1DFDD] overflow-hidden mb-8">
+        <div class="absolute -top-28 -right-24 w-96 h-96 bg-purple-200 rounded-full blur-3xl opacity-25"></div>
+        <div class="absolute -bottom-32 -left-28 w-96 h-96 bg-blue-200 rounded-full blur-3xl opacity-25"></div>
+
+        <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          <div class="lg:col-span-7">
+            <div class="inline-flex items-center space-x-2 bg-blue-50 text-[#0078D4] px-3 py-1 rounded-full text-xs font-bold uppercase mb-4 border border-blue-100">
+              <i class="fas fa-microchip"></i><span>Multi-Agent Query-to-Insight Engine</span>
+            </div>
+            <h1 class="text-4xl lg:text-5xl font-bold text-[#201F1E] leading-tight mb-4">
+              IA analítica con <span class="ai-text">resultados medidos</span>, no promesas
+            </h1>
+            <p class="text-lg text-[#605E5C] leading-relaxed mb-4">
+              SQLAgentX transforma preguntas de negocio en respuestas ejecutivas con un pipeline multiagente real:
+              Planner, Librarian, SQL Coder, Critic, SQL Execution y Evaluator. La propuesta de valor se sostiene en
+              benchmarks reproducibles synthetic y live, con mejoras claras de latencia percentil y reducción de tokens.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
+              <div class="metric bg-[#FAFAFA] p-3 rounded-lg border border-[#E1DFDD]">
+                <div class="text-xs text-[#605E5C] uppercase">Synthetic (C vs A)</div>
+                <div class="text-2xl font-bold text-[#0078D4]">-50.54%</div>
+                <div class="text-xs text-[#605E5C]">P50 latencia</div>
+              </div>
+              <div class="metric bg-[#FAFAFA] p-3 rounded-lg border border-[#E1DFDD]">
+                <div class="text-xs text-[#605E5C] uppercase">Live (C vs A)</div>
+                <div class="text-2xl font-bold text-[#5C2D91]">-62.50%</div>
+                <div class="text-xs text-[#605E5C]">tokens promedio</div>
+              </div>
+              <div class="metric bg-[#FAFAFA] p-3 rounded-lg border border-[#E1DFDD]">
+                <div class="text-xs text-[#605E5C] uppercase">Seguridad (B/C)</div>
+                <div class="text-2xl font-bold text-[#E81123]">100%</div>
+                <div class="text-xs text-[#605E5C]">bloqueo de casos maliciosos</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 grid grid-cols-1 gap-3">
+            <div class="bg-[#FAFAFA] p-4 rounded-xl border border-[#E1DFDD] shadow-sm">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-[#201F1E]">Impacto operacional</h3>
+                <i class="fas fa-bolt text-[#7FBA00]"></i>
+              </div>
+              <p class="text-sm text-[#605E5C] mt-2">Menos cómputo innecesario gracias a routing con short-circuit y cache de esquema con TTL 300s.</p>
+            </div>
+            <div class="bg-[#FAFAFA] p-4 rounded-xl border border-[#E1DFDD] shadow-sm">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-[#201F1E]">Impacto financiero</h3>
+                <i class="fas fa-coins text-[#F2C811]"></i>
+              </div>
+              <p class="text-sm text-[#605E5C] mt-2">Reducción directa de costo por inferencia: avg tokens live pasa de 32 (A) a 12 (C).</p>
+            </div>
+            <div class="bg-[#FAFAFA] p-4 rounded-xl border border-[#E1DFDD] shadow-sm">
+              <div class="flex items-center justify-between">
+                <h3 class="font-semibold text-[#201F1E]">Confiabilidad técnica</h3>
+                <i class="fas fa-shield-alt text-[#0078D4]"></i>
+              </div>
+              <p class="text-sm text-[#605E5C] mt-2">Guardrails de seguridad + self-correction con retries acotados (max 2) para controlar calidad sin explotar costo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="fluent-card p-6">
+          <h2 class="text-xl font-semibold mb-3">Benchmarks reproducibles</h2>
+          <p class="text-sm text-[#605E5C] mb-4">Resultados regenerados con scripts del proyecto. Synthetic valida baseline controlada; Live valida comportamiento contra Azure SQL real con queries seguras de INFORMATION_SCHEMA.</p>
+          <table class="w-full mini-table">
+            <thead>
+              <tr><th>Escenario</th><th>P50 Latencia</th><th>Tokens avg</th><th>Dato clave</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Synthetic A</td><td>2760 ms</td><td>1940</td><td>Baseline</td></tr>
+              <tr><td>Synthetic C</td><td>1365 ms</td><td>888</td><td>-50.54% p50</td></tr>
+              <tr><td>Live A</td><td>503 ms</td><td>32</td><td>Baseline real</td></tr>
+              <tr><td>Live C</td><td>500 ms</td><td>12</td><td>-62.50% tokens</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="fluent-card p-6">
+          <h2 class="text-xl font-semibold mb-3">Estado del enfoque SOTA inicial</h2>
+          <p class="text-sm text-[#605E5C] mb-4">Revisión objetiva de la propuesta original versus implementación actual del repo.</p>
+          <div class="space-y-3 text-sm">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="font-semibold">Multi-Agent Collaboration (MAC-SQL style)</div>
+                <div class="text-[#605E5C]">Implementado: pipeline con roles especializados y separación de responsabilidades.</div>
+              </div>
+              <span class="badge-ok text-xs px-2 py-1 rounded">Cumplido</span>
+            </div>
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="font-semibold">Execution-Guided Self-Correction</div>
+                <div class="text-[#605E5C]">Implementado: execute-reflect-correct con feedback de error y retries bounded.</div>
+              </div>
+              <span class="badge-ok text-xs px-2 py-1 rounded">Cumplido</span>
+            </div>
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="font-semibold">Semantic Pruning (RESDSQL/DIN-SQL)</div>
+                <div class="text-[#605E5C]">Parcial: contexto de esquema + caché; no hay schema-linking avanzado basado en recuperación vectorial por consulta.</div>
+              </div>
+              <span class="badge-partial text-xs px-2 py-1 rounded">Parcial</span>
+            </div>
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="font-semibold">Dynamic Few-Shot Prompting (RAG en Azure AI Search)</div>
+                <div class="text-[#605E5C]">No implementado en el flujo actual; se mantiene como línea de evolución prioritaria.</div>
+              </div>
+              <span class="badge-roadmap text-xs px-2 py-1 rounded">Roadmap</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="optimization" class="tab-content">
+      <div class="mb-8">
+        <h1 class="text-4xl font-light text-[#201F1E] mb-2">Flujo de Agentes: eficiencia por diseño</h1>
+        <p class="text-lg text-[#605E5C]">Cada etapa existe para reducir costo, mejorar precisión o proteger ejecución. El valor emerge de la combinación, no de un único truco.</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-4 space-y-6">
+          <div class="bg-white p-6 rounded-xl border border-[#E1DFDD] shadow-sm">
+            <h3 class="font-bold text-[#E81123] mb-3 flex items-center"><i class="fas fa-triangle-exclamation mr-2"></i>Problema raíz</h3>
+            <p class="text-sm text-[#605E5C] leading-relaxed">Text-to-SQL empresarial combina alta ambigüedad en lenguaje natural y rigidez extrema del esquema relacional. Si un solo agente intenta resolver todo, suben errores, latencia y costo por token.</p>
+          </div>
+          <div class="bg-gradient-to-br from-[#1094D2] to-[#5C2D91] p-6 rounded-xl text-white shadow-md">
+            <h3 class="font-bold mb-3 flex items-center"><i class="fas fa-sitemap mr-2"></i>Principio de diseño</h3>
+            <p class="text-sm opacity-90">Descomponer en agentes con responsabilidades acotadas + telemetría por etapa + ejecución segura para iterar con evidencia.</p>
+          </div>
+        </div>
+
+        <div class="lg:col-span-8 space-y-5">
+          <div class="fluent-card p-6 border-l-4 border-l-[#5C2D91]">
+            <h3 class="font-bold text-[18px] mb-2">1) Planner + Short-Circuit de ruta</h3>
+            <p class="text-sm text-[#605E5C]">`AgentPipeline` corta temprano si detecta `chat_pipeline` y salta directo a `Evaluator`. Se evitan etapas SQL completas cuando no agregan valor.</p>
+            <div class="text-xs text-[#605E5C] mt-2">Impacto: menor trabajo innecesario, menor latencia media de casos no analíticos.</div>
+          </div>
+
+          <div class="fluent-card p-6 border-l-4 border-l-[#0078D4]">
+            <h3 class="font-bold text-[18px] mb-2">2) Librarian con caché de esquema (TTL 300s)</h3>
+            <p class="text-sm text-[#605E5C]">Reutiliza catálogo, esquema enriquecido y relaciones FK para reducir round-trips repetidos a metadata SQL. Incluye fallback a caché ante fallos de fetch.</p>
+            <div class="text-xs text-[#605E5C] mt-2">Impacto: menor overhead de contexto y mayor resiliencia en ráfagas.</div>
+          </div>
+
+          <div class="fluent-card p-6 border-l-4 border-l-[#E81123]">
+            <h3 class="font-bold text-[18px] mb-2">3) Critic + SQLExecution con self-correction acotado</h3>
+            <p class="text-sm text-[#605E5C]">El Critic bloquea DDL/DML y valida tablas antes de ejecutar. Si falla, SQLExecution realimenta el error al SQL Coder y reintenta hasta 2 veces.</p>
+            <div class="text-xs text-[#605E5C] mt-2">Impacto: 100% security block en variantes optimizadas (B/C) y mejor robustez sin costo no acotado.</div>
+          </div>
+
+          <div class="fluent-card p-6 border-l-4 border-l-[#008272]">
+            <h3 class="font-bold text-[18px] mb-2">4) Fast-Track de consultas repetidas (variante C)</h3>
+            <p class="text-sm text-[#605E5C]">En benchmark live, C reaprovecha resultados para casos repetidos y logra 50% de hit-rate. Esto desplaza costo desde inferencia hacia reutilización.</p>
+            <div class="text-xs text-[#605E5C] mt-2">Impacto: Live avg tokens 32 -> 12 (-62.50%), Synthetic avg tokens 1940 -> 888 (-54.23%).</div>
+          </div>
+
+          <div class="fluent-card p-6 border-l-4 border-l-[#B26B00]">
+            <h3 class="font-bold text-[18px] mb-2">5) Streaming + Transparencia operacional</h3>
+            <p class="text-sm text-[#605E5C]">`BackendRealtimeListener` emite `assistant.delta` y `assistant.complete` con metadata de transparencia: timings por etapa, SQL, retries y filas.</p>
+            <div class="text-xs text-[#605E5C] mt-2">Impacto: mejor UX percibida y tuning continuo guiado por telemetría.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture" class="tab-content">
+      <div class="mb-4 flex flex-col lg:flex-row justify-between lg:items-end gap-3">
+        <div>
+          <h1 class="text-3xl font-light text-[#201F1E] mb-1">Arquitectura actual del proyecto</h1>
+          <p class="text-[#605E5C] text-sm">Canvas interactivo basado en la implementación real (`FastAPI + Azure Web PubSub + Agent Pipeline + Azure SQL`). Haz clic en nodos para detalle.</p>
+        </div>
+        <div class="hidden md:flex items-center bg-white border border-[#E1DFDD] rounded-md p-2 shadow-sm gap-4">
+          <span class="text-[11px] font-semibold text-[#201F1E] border-r border-[#E1DFDD] pr-2 uppercase tracking-wide">Leyenda</span>
+          <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm" style="background: var(--copilot-gradient);"></div><span class="text-[11px] text-[#605E5C]">Agentes</span></div>
+          <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-[var(--az-teal)]"></div><span class="text-[11px] text-[#605E5C]">Backend/Tooling</span></div>
+          <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-[var(--az-sql)]"></div><span class="text-[11px] text-[#605E5C]">Datos</span></div>
+          <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-[var(--az-red)]"></div><span class="text-[11px] text-[#605E5C]">Seguridad</span></div>
+          <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-[var(--az-monitor)]"></div><span class="text-[11px] text-[#605E5C]">Telemetría</span></div>
+        </div>
+      </div>
+
+      <div class="az-viewport" id="viewport">
+        <div class="canvas-controls">
+          <button class="canvas-btn" onclick="zoom(0.1)"><i class="fas fa-plus"></i></button>
+          <button class="canvas-btn" onclick="zoom(-0.1)"><i class="fas fa-minus"></i></button>
+          <button class="canvas-btn" onclick="resetTransform()"><i class="fas fa-compress"></i></button>
+        </div>
+
+        <div class="az-canvas-inner" id="canvas-inner">
+          
+          <!-- Bounding Boxes correctly positioned -->
+          <div class="az-boundary" style="top: 330px; left: 90px; width: 470px; height: 140px; border-color: #D83B0150;">
+            <span class="boundary-label text-[#D83B01]">Entry Layer</span>
+          </div>
+          <div class="az-boundary" style="top: 170px; left: 560px; width: 830px; height: 450px; border-color: #5C2D9150;">
+            <span class="boundary-label text-[#5C2D91]">Agent Pipeline</span>
+          </div>
+          <div class="az-boundary" style="top: 220px; left: 1420px; width: 260px; height: 140px; border-color: #00A4EF50;">
+            <span class="boundary-label text-[#00A4EF]">Data Layer</span>
+          </div>
+          <div class="az-boundary" style="top: 670px; left: 560px; width: 540px; height: 140px; border-color: #B26B0050;">
+            <span class="boundary-label text-[#B26B00]">Benchmark & Telemetry</span>
+          </div>
+
+          <!-- SVG Connections -->
+          <svg class="svg-pipeline">
+            <defs>
+              <marker id="arrow-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--az-blue)" /></marker>
+              <marker id="arrow-ai" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#C62287" /></marker>
+              <marker id="arrow-alert" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#E81123" /></marker>
+              <marker id="arrow-tel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#B26B00" /></marker>
+            </defs>
+
+            <!-- Paths BG (shadows/bases) -->
+            <path d="M 280 403 L 322 403" class="path-bg" />
+            <path d="M 530 403 L 560 403 L 560 323 L 582 323" class="path-bg" />
+            <path d="M 810 323 L 862 323" class="path-bg" />
+            <path d="M 1070 323 L 1115 323 L 1115 243 L 1152 243" class="path-bg" />
+            <path d="M 1360 243 L 1405 243 L 1405 293 L 1442 293" class="path-bg" />
+            <path d="M 1450 293 L 1405 293 L 1405 343 L 1368 343" class="path-bg" />
+            <path d="M 1260 385 L 1260 392" class="path-bg" />
+            <path d="M 1260 485 L 1260 492" class="path-bg" />
+            <path d="M 1160 443 L 1120 443 L 1120 343 L 1152 343" class="path-bg" />
+            <path d="M 1160 543 L 1078 543" class="path-bg" />
+            <path d="M 970 365 L 970 492" class="path-bg" />
+            <path d="M 700 365 L 700 472" class="path-bg" />
+            <path d="M 700 565 L 700 692" class="path-bg" />
+            <path d="M 970 585 L 970 692" class="path-bg" />
+
+            <!-- Animated Paths -->
+            <!-- Frontend -> FastAPI -->
+            <path d="M 280 403 L 322 403" class="path-data" marker-end="url(#arrow-data)" />
+            <!-- FastAPI -> PubSub -->
+            <path d="M 530 403 L 560 403 L 560 323 L 582 323" class="path-data" marker-end="url(#arrow-data)" />
+            <!-- PubSub -> Planner -->
+            <path d="M 810 323 L 862 323" class="path-ai" marker-end="url(#arrow-ai)" />
+            <!-- Planner -> Librarian -->
+            <path d="M 1070 323 L 1115 323 L 1115 243 L 1152 243" class="path-ai" marker-end="url(#arrow-ai)" />
+            <!-- Librarian -> Azure SQL -->
+            <path d="M 1360 243 L 1405 243 L 1405 293 L 1442 293" class="path-data" marker-end="url(#arrow-data)" />
+            <!-- Azure SQL -> SQL Coder -->
+            <path d="M 1450 293 L 1405 293 L 1405 343 L 1368 343" class="path-data" marker-end="url(#arrow-data)" />
+            <!-- Coder -> Critic -->
+            <path d="M 1260 385 L 1260 392" class="path-data" marker-end="url(#arrow-data)" />
+            <!-- Critic -> Execution -->
+            <path d="M 1260 485 L 1260 492" class="path-data" marker-end="url(#arrow-data)" />
+            <!-- Critic -> Coder (Loop Red) -->
+            <path d="M 1160 443 L 1120 443 L 1120 343 L 1152 343" class="path-alert" marker-end="url(#arrow-alert)" />
+            <!-- Execution -> Evaluator -->
+            <path d="M 1160 543 L 1078 543" class="path-data" marker-end="url(#arrow-data)" />
+            <!-- Planner -> Evaluator -->
+            <path d="M 970 365 L 970 492" class="path-ai" marker-end="url(#arrow-ai)" />
+            <!-- PubSub -> Listener -->
+            <path d="M 700 365 L 700 472" class="path-event" marker-end="url(#arrow-data)" />
+            <!-- Listener -> Benchmark -->
+            <path d="M 700 565 L 700 692" class="path-tel" marker-end="url(#arrow-tel)" />
+            <!-- Evaluator -> Reportes -->
+            <path d="M 970 585 L 970 692" class="path-tel" marker-end="url(#arrow-tel)" />
+          </svg>
+
+          <!-- Nodes with explicit grid coordinates -->
+          
+          <!-- ENTRY LAYER -->
+          <div class="az-node n-office" style="top: 360px; left: 120px; width: 160px;" onclick="openBlade('frontend')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#D83B01]"><i class="fas fa-user text-white"></i></div><h4 class="font-bold text-[13px]">Frontend</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">Web client + user message</p>
+          </div>
+
+          <div class="az-node n-teal" style="top: 360px; left: 330px; width: 200px;" onclick="openBlade('fastapi')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#008272]"><i class="fas fa-server text-white"></i></div><h4 class="font-bold text-[13px]">FastAPI API</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">/api/messages /api/negotiate</p>
+          </div>
+
+          <!-- AGENT PIPELINE -->
+          <div class="az-node n-blue" style="top: 280px; left: 590px; width: 220px;" onclick="openBlade('pubsub')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-broadcast-tower text-white"></i></div><h4 class="font-bold text-[13px]">Azure Web PubSub</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">Mensajería realtime</p>
+          </div>
+
+          <div class="az-node n-ai-core" style="top: 280px; left: 870px; width: 200px;" onclick="openBlade('planner')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#C62287]"><i class="fas fa-route text-white"></i></div><h4 class="font-bold text-[13px] ai-text">Planner</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">Route chat/sql + sub-queries</p>
+          </div>
+
+          <div class="az-node n-purple" style="top: 200px; left: 1160px; width: 200px;" onclick="openBlade('librarian')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#5C2D91]"><i class="fas fa-book text-white"></i></div><h4 class="font-bold text-[13px]">Librarian</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">Schema context + cache</p>
+          </div>
+
+          <div class="az-node n-blue" style="top: 300px; left: 1160px; width: 200px;" onclick="openBlade('coder')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-code text-white"></i></div><h4 class="font-bold text-[13px]">SQL Coder</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">Generación SQL</p>
+          </div>
+
+          <div class="az-node n-red" style="top: 400px; left: 1160px; width: 200px;" onclick="openBlade('critic')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#E81123]"><i class="fas fa-shield-halved text-white"></i></div><h4 class="font-bold text-[13px]">Critic</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">Guardrails + repair</p>
+          </div>
+
+          <div class="az-node n-teal" style="top: 500px; left: 1160px; width: 200px;" onclick="openBlade('execution')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#008272]"><i class="fas fa-play text-white"></i></div><h4 class="font-bold text-[13px]">SQL Execution</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">execute_select + retries</p>
+          </div>
+
+          <div class="az-node n-blue" style="top: 500px; left: 870px; width: 200px;" onclick="openBlade('evaluator')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-file-lines text-white"></i></div><h4 class="font-bold text-[13px]">Evaluator</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">Reporte ejecutivo</p>
+          </div>
+          
+          <div class="az-node n-monitor" style="top: 480px; left: 590px; width: 220px;" onclick="openBlade('listener')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#B26B00]"><i class="fas fa-ear-listen text-white"></i></div><h4 class="font-bold text-[13px]">BackendRealtimeListener</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">status + delta + complete</p>
+          </div>
+
+          <!-- DATA LAYER -->
+          <div class="az-node n-sql" style="top: 250px; left: 1450px; width: 200px;" onclick="openBlade('azuresql')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#00A4EF]"><i class="fas fa-database text-white"></i></div><h4 class="font-bold text-[13px]">Azure SQL</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">INFORMATION_SCHEMA</p>
+          </div>
+
+          <!-- BENCHMARK & TELEMETRY -->
+          <div class="az-node n-monitor" style="top: 700px; left: 590px; width: 220px;" onclick="openBlade('benchmark')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#B26B00]"><i class="fas fa-gauge-high text-white"></i></div><h4 class="font-bold text-[13px]">Benchmark Engine</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">Synthetic/Live variants</p>
+          </div>
+
+          <div class="az-node n-monitor" style="top: 700px; left: 870px; width: 200px;" onclick="openBlade('reports')">
+            <div class="az-node-header"><div class="az-node-icon bg-[#B26B00]"><i class="fas fa-chart-column text-white"></i></div><h4 class="font-bold text-[13px]">Reportes KPI</h4></div>
+            <p class="text-[10px] text-[#A19F9D]">JSON + Markdown técnico</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="blade-overlay" id="bladeOverlay" onclick="closeBlade()"></div>
+  <div class="blade-panel" id="bladePanel">
+    <div class="blade-header">
+      <div>
+        <span id="bladeTag" class="ado-tag bg-[#E1DFDD] text-[#201F1E] mb-2 inline-block">Detalle</span>
+        <h2 id="bladeTitle" class="text-2xl font-light text-[#201F1E] mt-1">Componente</h2>
+      </div>
+      <button onclick="closeBlade()" class="text-[#605E5C] hover:text-[#201F1E] p-2 bg-[#E1DFDD] rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="blade-body" id="bladeContent"></div>
+  </div>
+
+  <script>
+    function switchTab(tabId, button) {
+      document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-link').forEach(link => link.classList.remove('active'));
+      document.getElementById(tabId).classList.add('active');
+      if (button) button.classList.add('active');
+      if (tabId === 'architecture') requestAnimationFrame(() => fitCanvasToViewport());
+    }
+
+    const viewport = document.getElementById('viewport');
+    const canvas = document.getElementById('canvas-inner');
+    const MIN_SCALE = 0.3;
+    const MAX_SCALE = 2;
+    let scale = 1;
+    let panX = 0;
+    let panY = 0;
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+
+    function updateTransform() { if (canvas) canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`; }
+    function zoom(delta, clientX = null, clientY = null) {
+      if (!viewport || !canvas) return;
+      const previousScale = scale;
+      scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale + delta));
+
+      if (clientX === null || clientY === null || previousScale === scale) {
+        updateTransform();
+        return;
+      }
+
+      const rect = viewport.getBoundingClientRect();
+      const cursorX = clientX - rect.left;
+      const cursorY = clientY - rect.top;
+
+      const worldX = (cursorX - panX) / previousScale;
+      const worldY = (cursorY - panY) / previousScale;
+
+      panX = cursorX - (worldX * scale);
+      panY = cursorY - (worldY * scale);
+      updateTransform();
+    }
+
+    function getContentBounds() {
+      if (!canvas) return { minX: 0, minY: 0, maxX: 2000, maxY: 1200 };
+      const elements = canvas.querySelectorAll('.az-node, .az-boundary');
+      if (!elements.length) return { minX: 0, minY: 0, maxX: 2000, maxY: 1200 };
+
+      let minX = Number.POSITIVE_INFINITY;
+      let minY = Number.POSITIVE_INFINITY;
+      let maxX = Number.NEGATIVE_INFINITY;
+      let maxY = Number.NEGATIVE_INFINITY;
+
+      elements.forEach((el) => {
+        const style = window.getComputedStyle(el);
+        const left = parseFloat(style.left || '0');
+        const top = parseFloat(style.top || '0');
+        const width = parseFloat(style.width || `${el.offsetWidth}`);
+        const height = parseFloat(style.height || `${el.offsetHeight}`);
+
+        minX = Math.min(minX, left);
+        minY = Math.min(minY, top);
+        maxX = Math.max(maxX, left + width);
+        maxY = Math.max(maxY, top + height);
+      });
+
+      return { minX, minY, maxX, maxY };
+    }
+
+    function fitCanvasToViewport() {
+      if (!viewport) return;
+      const { minX, minY, maxX, maxY } = getContentBounds();
+      const contentWidth = Math.max(1, maxX - minX);
+      const contentHeight = Math.max(1, maxY - minY);
+
+      const padding = 80;
+      const availableW = Math.max(1, viewport.clientWidth - (padding * 2));
+      const availableH = Math.max(1, viewport.clientHeight - (padding * 2));
+
+      const fitScale = Math.min(availableW / contentWidth, availableH / contentHeight);
+      scale = Math.max(0.35, Math.min(1.2, fitScale));
+
+      panX = ((viewport.clientWidth - (contentWidth * scale)) / 2) - (minX * scale);
+      panY = ((viewport.clientHeight - (contentHeight * scale)) / 2) - (minY * scale);
+      updateTransform();
+    }
+
+    function resetTransform() { fitCanvasToViewport(); }
+
+    if (viewport) {
+      viewport.addEventListener('mousedown', e => {
+        if (e.target.closest('.az-node, .canvas-controls')) return;
+        isDragging = true;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+        if (canvas) canvas.style.transition = 'none';
+      });
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+        if (canvas) canvas.style.transition = 'transform 0.1s ease-out';
+      });
+      window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+        updateTransform();
+      });
+      viewport.addEventListener('wheel', e => {
+        e.preventDefault();
+        zoom(e.deltaY > 0 ? -0.05 : 0.05, e.clientX, e.clientY);
+      });
+
+      window.addEventListener('resize', () => fitCanvasToViewport());
+    }
+    fitCanvasToViewport();
+
+    const bladeData = {
+      frontend: {
+        tag: 'Canal',
+        title: 'Frontend / Usuario',
+        content: '<p class="text-sm text-[#605E5C]">Origen de la solicitud analítica. Envía mensajes al backend y recibe streaming de respuesta para reducir latencia percibida.</p>'
+      },
+      fastapi: {
+        tag: 'Backend',
+        title: 'FastAPI API',
+        content: '<p class="text-sm text-[#605E5C]">Expone salud y endpoints de negocio: negotiate, mensajes y sugerencias SQL. Inicia listener realtime y pipeline al levantar la app.</p>'
+      },
+      pubsub: {
+        tag: 'Realtime',
+        title: 'Azure Web PubSub',
+        content: '<p class="text-sm text-[#605E5C]">Canal websocket para eventos en tiempo real. Permite status, deltas y finalización de respuesta sin polling.</p>'
+      },
+      listener: {
+        tag: 'Telemetry',
+        title: 'BackendRealtimeListener',
+        content: '<p class="text-sm text-[#605E5C]">Consume eventos de grupo, ejecuta pipeline y publica assistant.delta + assistant.complete con metadata de transparencia (timings, SQL, retries, rows).</p>'
+      },
+      planner: {
+        tag: 'AI Orchestrator',
+        title: 'Planner Agent',
+        content: '<p class="text-sm text-[#605E5C]">Define intención y ruta (chat/sql), descompone sub-queries y activa short-circuit para chat, evitando etapas costosas.</p>'
+      },
+      librarian: {
+        tag: 'AI Context',
+        title: 'Librarian Agent',
+        content: '<p class="text-sm text-[#605E5C]">Recupera catálogo, esquema enriquecido y FK context. Mantiene caché con TTL 300s para reducir costo de metadata repetida.</p>'
+      },
+      coder: {
+        tag: 'AI Generation',
+        title: 'SQL Coder Agent',
+        content: '<p class="text-sm text-[#605E5C]">Genera SQL usando esquema real. Incluye mecanismo de regeneración para corrección tras errores de ejecución.</p>'
+      },
+      critic: {
+        tag: 'AI Security',
+        title: 'Critic Agent',
+        content: '<p class="text-sm text-[#605E5C]">Bloquea DDL/DML, valida tablas y aplica reparación de SQL. En benchmarks optimizados logra 100% de bloqueo de casos maliciosos medidos.</p>'
+      },
+      execution: {
+        tag: 'Execution',
+        title: 'SQLExecution Agent',
+        content: '<p class="text-sm text-[#605E5C]">Ejecuta SQL validado en modo seguro y reintenta con autocorrección hasta máximo 2 veces para controlar costo y robustez.</p>'
+      },
+      evaluator: {
+        tag: 'AI Output',
+        title: 'Evaluator Agent',
+        content: '<p class="text-sm text-[#605E5C]">Convierte filas en respuesta ejecutiva en español y mantiene trazabilidad del análisis para transparencia técnica.</p>'
+      },
+      azuresql: {
+        tag: 'Data',
+        title: 'Azure SQL',
+        content: '<p class="text-sm text-[#605E5C]">Fuente transaccional y metadatos de esquema. En benchmark live, la etapa de ejecución domina la latencia total, explicando mejoras P50 más moderadas.</p>'
+      },
+      benchmark: {
+        tag: 'Validation',
+        title: 'Benchmark Engine (A/B/C)',
+        content: '<p class="text-sm text-[#605E5C]">Evalúa variantes de estrategia en synthetic (8 casos) y live (4 casos) con KPIs de latencia, tokens, seguridad y aciertos.</p>'
+      },
+      reports: {
+        tag: 'Evidence',
+        title: 'Reportes y KPIs',
+        content: '<p class="text-sm text-[#605E5C]">Entrega artefactos JSON y Markdown para trazabilidad: benchmark_results, benchmark_report y deep-dive técnico-comercial.</p>'
+      }
+    };
+
+    function openBlade(id) {
+      const data = bladeData[id] || { tag: 'Info', title: 'Detalle', content: '<p class="text-sm">Sin contenido.</p>' };
+      const tagEl = document.getElementById('bladeTag');
+      tagEl.innerText = data.tag;
+
+      if (data.tag.includes('AI')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#F3D9EB] text-[#5C2D91]';
+      } else if (data.tag.includes('Realtime') || data.tag.includes('Execution') || data.tag.includes('Backend')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#D0E7E3] text-[#008272]';
+      } else if (data.tag.includes('Data')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#CCE4F7] text-[#0078D4]';
+      } else if (data.tag.includes('Security')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#FDE7E9] text-[#E81123]';
+      } else if (data.tag.includes('Validation') || data.tag.includes('Evidence') || data.tag.includes('Telemetry')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#FCE10040] text-[#8A6100]';
+      } else {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#E1DFDD] text-[#201F1E]';
+      }
+
+      document.getElementById('bladeTitle').innerText = data.title;
+      document.getElementById('bladeContent').innerHTML = data.content;
+      document.getElementById('bladeOverlay').classList.add('active');
+      document.getElementById('bladePanel').classList.add('active');
+    }
+
+    function closeBlade() {
+      document.getElementById('bladeOverlay').classList.remove('active');
+      document.getElementById('bladePanel').classList.remove('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+services:
+  realtime-agent-demo:
+    build: .
+    env_file:
+      - .env
+    ports:
+      - "8010:8010"
+    restart: unless-stopped

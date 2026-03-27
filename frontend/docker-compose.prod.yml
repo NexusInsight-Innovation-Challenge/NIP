@@ -1,0 +1,33 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: innovation-chat-redis-prod
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-prod-data:/data
+    restart: unless-stopped
+
+  next-app:
+    container_name: innovation-chat-prod
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      NEXT_TELEMETRY_DISABLED: "1"
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      REDIS_CHAT_TTL_SECONDS: ${REDIS_CHAT_TTL_SECONDS:-604800}
+      REDIS_CHAT_MAX_MESSAGES: ${REDIS_CHAT_MAX_MESSAGES:-500}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+volumes:
+  redis-prod-data:

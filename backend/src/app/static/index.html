@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Realtime Agent Demo</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; max-width: 860px; }
+      textarea { width: 100%; min-height: 100px; }
+      button { margin-top: 8px; padding: 8px 12px; }
+      .box { border: 1px solid #ddd; padding: 12px; border-radius: 8px; margin-top: 12px; }
+      pre { background: #f4f4f4; padding: 10px; border-radius: 8px; overflow: auto; }
+    </style>
+  </head>
+  <body>
+    <h1>Azure Web PubSub + Agents Demo</h1>
+    <p>Conecta por WebSocket, envía un mensaje realtime y observa el procesamiento del backend agent pipeline.</p>
+
+    <div class="box">
+      <label for="message">Mensaje</label>
+      <textarea id="message" placeholder="Escribe un mensaje..."></textarea>
+      <br />
+      <button id="connect">1) Conectar</button>
+      <button id="send" disabled>2) Enviar</button>
+    </div>
+
+    <div class="box">
+      <h3>Estado</h3>
+      <pre id="status">Desconectado</pre>
+    </div>
+
+    <div class="box">
+      <h3>Streaming</h3>
+      <pre id="stream"></pre>
+    </div>
+
+    <script>
+      const statusEl = document.getElementById('status');
+      const streamEl = document.getElementById('stream');
+      const connectBtn = document.getElementById('connect');
+      const sendBtn = document.getElementById('send');
+      const messageEl = document.getElementById('message');
+
+      let socket;
+      let groupName;
+
+      function setStatus(data) {
+        statusEl.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+      }
+
+      connectBtn.onclick = async () => {
+        try {
+          const response = await fetch('/api/negotiate', { method: 'POST' });
+          const negotiate = await response.json();
+          groupName = negotiate.group;
+
+          socket = new WebSocket(negotiate.url, 'json.webpubsub.azure.v1');
+
+          socket.onopen = () => {
+            setStatus({ connected: true, userId: negotiate.userId, group: groupName });
+            socket.send(JSON.stringify({ type: 'joinGroup', group: groupName, ackId: 1 }));
+            sendBtn.disabled = false;
+          };
+
+          socket.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            if (msg.type !== 'message' || msg.from !== 'group' || msg.dataType !== 'json') {
+              return;
+            }
+
+            const envelope = msg.data;
+            if (envelope.event_type === 'assistant.delta') {
+              streamEl.textContent += envelope.payload.delta;
+            } else if (envelope.event_type === 'assistant.complete') {
+              streamEl.textContent += '\n\n[complete]\n';
+            } else if (envelope.event_type === 'status') {
+              setStatus(envelope.payload);
+            } else if (envelope.event_type === 'error') {
+              setStatus(envelope);
+            }
+          };
+
+          socket.onclose = () => {
+            setStatus('Desconectado');
+            sendBtn.disabled = true;
+          };
+        } catch (error) {
+          setStatus({ error: error.message || String(error) });
+        }
+      };
+
+      sendBtn.onclick = () => {
+        if (!socket || socket.readyState !== WebSocket.OPEN) {
+          setStatus('Conexión no abierta');
+          return;
+        }
+
+        streamEl.textContent = '';
+        const envelope = {
+          event_type: 'user.message',
+          role: 'user',
+          payload: { message: messageEl.value, userId: 'frontend-user' },
+          metadata: { source: 'frontend.websocket' }
+        };
+
+        socket.send(JSON.stringify({
+          type: 'sendToGroup',
+          group: groupName,
+          dataType: 'json',
+          data: envelope,
+          ackId: Date.now()
+        }));
+      };
+    </script>
+  </body>
+</html>

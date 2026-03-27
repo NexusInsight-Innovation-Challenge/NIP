@@ -37,6 +37,9 @@ az provider register --namespace Microsoft.ApiManagement
 # Autorización y RBAC | Authorization and RBAC
 az provider register --namespace Microsoft.Authorization
 
+# Servicios de Aplicaciones | Application Services
+az provider register --namespace Microsoft.App
+
 sleep 3
 
 az provider list --query "[?registrationState!='Registered']"

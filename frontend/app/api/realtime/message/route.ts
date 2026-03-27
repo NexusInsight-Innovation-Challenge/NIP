@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { publishRealtimeEvent } from "@/lib/realtime/service";
 import { appendMessage, upsertSession } from "@/lib/realtime/store";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -14,9 +16,18 @@ const bodySchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // 1. Verificación en Backend Node.js
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const payload = bodySchema.parse(await request.json());
     const now = new Date().toISOString();
-    const userId = `web-user-${payload.sessionId.slice(0, 12)}`;
+    
+    // 2. Utilizamos el email del usuario de Entra ID como ID
+    const validatedUserEmail = session?.user?.email ?? "unknown-user";
+    const userId = validatedUserEmail;
 
     const envelope = {
       event_type: "user.message",

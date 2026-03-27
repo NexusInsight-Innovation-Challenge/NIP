@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { negotiateRealtimeConnection } from "@/lib/realtime/service";
 import { upsertSession } from "@/lib/realtime/store";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,9 +18,17 @@ const bodySchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // 1. Verificamos la sesión a nivel de servidor
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const payload = bodySchema.parse(await request.json());
-    const userId =
-      payload.userId ?? `web-user-${payload.sessionId.slice(0, 12)}`;
+    
+    // 2. Extraemos el email real devuelto por Entra ID (si existe), si no, usamos fallback
+    const validatedUserEmail = session?.user?.email ?? "unknown-user";
+    const userId = payload.userId ?? validatedUserEmail;
 
     await upsertSession(payload.sessionId, userId);
     const token = await negotiateRealtimeConnection(userId);

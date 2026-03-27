@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { nanoid } from "nanoid";
+import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import {
   Conversation,
@@ -36,6 +37,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { NexusLogo } from "@/components/nexus-logo";
 import {
   RefreshCwIcon,
   SparklesIcon,
@@ -121,6 +123,9 @@ interface PendingApprovalState {
 
 const SOCKET_RETRY_MS = 1200;
 const SESSION_STORAGE_KEY = "realtime-chat-session-id";
+
+import { LogoutButton } from "@/components/logout-button";
+
 const FIXED_MODEL = {
   chefSlug: "openai" as const,
   id: "gpt-4o",
@@ -701,6 +706,7 @@ const parseStageTiming = (
 };
 
 function HomePageClient() {
+  const { data: session } = useSession();
   const [isClientMounted, setIsClientMounted] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [input, setInput] = useState("");
@@ -937,7 +943,7 @@ function HomePageClient() {
 
   const routeLabel = useMemo(() => {
     if (pipelineRoute === "sql_pipeline") {
-      return "SQLAgentX";
+      return "Nexus Insight";
     }
     if (pipelineRoute === "chat_pipeline") {
       return "Chat";
@@ -1115,7 +1121,7 @@ function HomePageClient() {
       resetStreamingState();
       const routeLabel =
         route === "sql_pipeline"
-          ? "SQLAgentX"
+          ? "Nexus Insight"
           : route === "chat_pipeline"
             ? "Chat"
             : "General";
@@ -1668,15 +1674,15 @@ function HomePageClient() {
         <div className="glass border-b border-white/8 px-5 py-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="relative flex size-9 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-lg shadow-blue-500/20">
-                <ZapIcon className="size-5 text-white" />
+              <div className="relative flex size-9 items-center justify-center rounded-xl shadow-lg">
+                <NexusLogo className="size-9" />
                 {isSubmitting && (
                   <div className="absolute -inset-0.5 animate-pipeline-glow rounded-xl" />
                 )}
               </div>
               <div>
                 <h1 className="text-base font-bold tracking-tight text-foreground">
-                  SQLAgent<span className="text-neon">X</span>
+                  Nexus Insight
                 </h1>
                 <p className="text-[11px] text-muted-foreground">
                   Query-to-Insight Analytics Engine
@@ -1720,6 +1726,7 @@ function HomePageClient() {
               >
                 Nuevo chat
               </Button>
+              <LogoutButton />
             </div>
           </div>
 
@@ -1736,7 +1743,12 @@ function HomePageClient() {
                 {routeLabel}
               </Badge>
             </div>
-            <p className="text-[10px] text-muted-foreground/60">
+            <p className="flex items-center gap-2 text-[10px] text-muted-foreground/60">
+              {session?.user?.name && (
+                <span className="font-semibold text-foreground/70">
+                  {session.user.name}
+                </span>
+              )}
               <span className="font-mono text-foreground/50">
                 {sessionId || "..."}
               </span>

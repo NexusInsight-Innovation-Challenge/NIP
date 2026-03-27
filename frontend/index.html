@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nexus Insight | Microsoft Innovation Challenge</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    @font-face { font-family: 'Segoe UI Variable Display'; src: local('Segoe UI Variable Display'), local('Segoe UI'); }
+
+    :root {
+      --az-blue: #0078D4; --az-teal: #008272; --az-purple: #5C2D91;
+      --az-green: #7FBA00; --az-orange: #D83B01; --az-red: #E81123;
+      --az-monitor: #B26B00; --az-sql: #00A4EF; --az-kv: #B4009E;
+      --ms-bg-light: #FAFAFA; --ms-surface: #FFFFFF; --ms-border: #E1DFDD;
+      --ms-text-main: #201F1E; --ms-text-muted: #605E5C;
+      --copilot-gradient: linear-gradient(110deg, #1094D2, #6C35D4, #C62287, #1094D2);
+      --fluent-shadow: 0 8px 16px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+      --fluent-shadow-hover: 0 14px 28px rgba(0,0,0,0.1), 0 4px 10px rgba(0,0,0,0.05);
+      --glow-shadow: 0 10px 30px -10px rgba(0, 120, 212, 0.4);
+    }
+
+    body {
+      font-family: 'Segoe UI Variable Display', -apple-system, sans-serif;
+      background-color: #f8f9fa;
+      color: var(--ms-text-main);
+      overflow: hidden; /* Slides mode */
+      margin: 0;
+      padding: 0;
+    }
+
+    /* GLOBAL DYNAMIC BACKGROUND */
+    .bg-orbs {
+      position: fixed;
+      top: 0; left: 0; width: 100vw; height: 100vh;
+      z-index: -1;
+      overflow: hidden;
+      background: #f8f9fa;
+    }
+    .orb-1 {
+      position: absolute; top: -10%; left: -10%; width: 50vw; height: 50vw;
+      background: radial-gradient(circle, rgba(16,148,210,0.15) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+      animation: drift 25s infinite alternate ease-in-out;
+    }
+    .orb-2 {
+      position: absolute; bottom: -10%; right: -10%; width: 60vw; height: 60vw;
+      background: radial-gradient(circle, rgba(108,53,212,0.1) 0%, rgba(255,255,255,0) 70%);
+      border-radius: 50%;
+      animation: drift 30s infinite alternate-reverse ease-in-out;
+    }
+    @keyframes drift {
+      0% { transform: translate(0, 0) scale(1); }
+      100% { transform: translate(10%, 10%) scale(1.1); }
+    }
+
+    /* SHINING AI TEXT */
+    .ai-text {
+      background: var(--copilot-gradient);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 4s linear infinite;
+    }
+    @keyframes shine { to { background-position: 200% center; } }
+
+    /* SLIDES ENGINE */
+    #slides-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .slide {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      transform: translateY(20px) scale(0.98);
+      background-color: transparent;
+      display: flex;
+      flex-direction: column;
+      padding: 4rem 6rem;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .slide.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      z-index: 10;
+    }
+
+    /* STAGGERED ENTRY ANIMATIONS */
+    .stagger-1, .stagger-2, .stagger-3, .stagger-4 {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .slide.active .stagger-1 { opacity: 1; transform: translateY(0); transition-delay: 0.1s; }
+    .slide.active .stagger-2 { opacity: 1; transform: translateY(0); transition-delay: 0.25s; }
+    .slide.active .stagger-3 { opacity: 1; transform: translateY(0); transition-delay: 0.4s; }
+    .slide.active .stagger-4 { opacity: 1; transform: translateY(0); transition-delay: 0.55s; }
+
+    /* CONTROLS */
+    .controls {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 50;
+      display: flex;
+      gap: 1rem;
+      background: rgba(255,255,255,0.7);
+      padding: 0.5rem 1rem;
+      border-radius: 30px;
+      box-shadow: var(--fluent-shadow);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+    .controls button {
+      color: var(--ms-text-muted);
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .controls button:hover:not(:disabled) { background: var(--ms-surface); color: var(--az-blue); box-shadow: var(--fluent-shadow); transform: translateY(-2px); }
+    .controls button:disabled { color: #ccc; cursor: not-allowed; }
+    .slide-indicator { display: flex; align-items: center; font-weight: 600; color: var(--ms-text-muted); font-size: 0.9rem; margin: 0 1rem; }
+
+    /* COMPONENT CLASSES */
+    .fluent-card { 
+      background: rgba(255,255,255,0.7); 
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.6); 
+      border-radius: 16px; 
+      box-shadow: var(--fluent-shadow); 
+      padding: 2rem; 
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fluent-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--fluent-shadow-hover);
+      background: rgba(255,255,255,0.9);
+    }
+    
+    /* ANIMATIONS FOR SLIDE 7 & GENERAL FLOATS */
+    @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+    .animate-float { animation: float 6s ease-in-out infinite; }
+    .animate-float-delay-1 { animation: float 6s ease-in-out 2s infinite; }
+    .animate-float-delay-2 { animation: float 6s ease-in-out 4s infinite; }
+    @keyframes slowPulse { 0% { opacity: 0.3; transform: scale(0.95); } 50% { opacity: 0.6; transform: scale(1.05); } 100% { opacity: 0.3; transform: scale(0.95); } }
+    .animate-slow-pulse { animation: slowPulse 6s ease-in-out infinite; }
+
+    .glow-border {
+      position: relative;
+      background: var(--ms-surface);
+      border-radius: 1.5rem;
+      z-index: 1;
+    }
+    .glow-border::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: 1.6rem;
+      background: var(--copilot-gradient);
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .glow-border:hover::before { opacity: 1; }
+
+    /* CANVAS ARCHITECTURE */
+    .az-viewport {
+      background: #11100F; border-radius: 16px; position: relative; width: 100%; height: 100%; min-height: 600px; overflow: hidden;
+      box-shadow: inset 0 0 60px rgba(0,0,0,1); cursor: grab; border: 1px solid #3b3a39;
+    }
+    .az-viewport:active { cursor: grabbing; }
+    .az-canvas-inner {
+      position: absolute; top: 0; left: 0; width: 2400px; height: 1400px; transform-origin: 0 0;
+      background-image: linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px; transition: transform .1s ease-out; will-change: transform;
+    }
+    .az-boundary { position: absolute; border: 2px dashed #484644; border-radius: 12px; background: rgba(255,255,255,.02); z-index: 5; pointer-events: none; }
+    .boundary-label { position: absolute; top: -14px; left: 24px; background: #11100F; padding: 0 12px; color: #a19f9d; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; border-radius: 4px;}
+    .az-node { position: absolute; background: #252423; border: 1px solid #3b3a39; border-radius: 8px; color: #fff; padding: 16px; z-index: 10; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,.8); transition: all .3s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
+    .az-node:hover { border-color: var(--az-blue); transform: translateY(-4px) scale(1.02); z-index: 20; box-shadow: 0 15px 30px rgba(0,120,212,.3); }
+    .az-node-header { display: flex; align-items: center; margin-bottom: 10px; border-bottom: 1px solid #3b3a39; padding-bottom: 10px; }
+    .az-node-icon { width: 32px; height: 32px; display: flex; justify-content: center; align-items: center; border-radius: 6px; margin-right: 12px; font-size: 16px; }
+    
+    /* Node Colors */
+    .n-blue { border-left: 4px solid var(--az-blue); }
+    .n-teal { border-left: 4px solid var(--az-teal); }
+    .n-purple { border-left: 4px solid var(--az-purple); }
+    .n-red { border-left: 4px solid var(--az-red); }
+    .n-monitor { border-left: 4px solid var(--az-monitor); }
+    .n-sql { border-left: 4px solid var(--az-sql); }
+    .n-github { border-left: 4px solid #a19f9d; }
+    .n-bicep { border-left: 4px solid var(--az-blue); }
+    .n-entra { border-left: 4px solid var(--az-blue); }
+    .n-kv { border-left: 4px solid var(--az-kv); }
+    .n-nextjs { border-left: 4px solid #e1dfdd; }
+    .n-redis { border-left: 4px solid #DC382D; }
+    .n-appinsights { border-left: 4px solid #8661C5; }
+    .n-loganalytics { border-left: 4px solid var(--az-blue); }
+
+    .n-ai-core { position: relative; border-radius: 10px; border: 1px solid #484644; }
+    .n-ai-core::before { content: ''; position: absolute; inset: -2px; z-index: -1; background: var(--copilot-gradient); border-radius: 12px; opacity: .7; animation: pulse-glow 3s infinite alternate; }
+    @keyframes pulse-glow { 0% { opacity: .4; filter: blur(4px); } 100% { opacity: 1; filter: blur(8px); } }
+
+    /* GLOWING SVG Paths */
+    .svg-pipeline { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+    .path-bg { fill: none; stroke: #323130; stroke-width: 2; }
+    .path-data { fill: none; stroke: var(--az-blue); stroke-width: 2.5; stroke-dasharray: 6 8; animation: flow 1s linear infinite; filter: drop-shadow(0 0 4px rgba(0,120,212,0.6)); }
+    .path-ai { fill: none; stroke: #C62287; stroke-width: 2.5; stroke-dasharray: 6 8; animation: flow 1.2s linear infinite; filter: drop-shadow(0 0 4px rgba(198,34,135,0.6)); }
+    .path-event { fill: none; stroke: var(--az-teal); stroke-width: 2.5; stroke-dasharray: 8 8; animation: flow 1s linear infinite; filter: drop-shadow(0 0 4px rgba(0,130,114,0.6)); }
+    .path-alert { fill: none; stroke: var(--az-red); stroke-width: 2.5; stroke-dasharray: 4 5; animation: flow-reverse .9s linear infinite; filter: drop-shadow(0 0 4px rgba(232,17,35,0.6)); }
+    .path-tel { fill: none; stroke: var(--az-monitor); stroke-width: 2; stroke-dasharray: 3 5; animation: flow 1.8s linear infinite; }
+    .path-infra { fill: none; stroke: #a19f9d; stroke-width: 2; stroke-dasharray: 4 4; animation: flow 2s linear infinite; }
+    @keyframes flow { to { stroke-dashoffset: -20; } }
+    @keyframes flow-reverse { to { stroke-dashoffset: 20; } }
+
+    .canvas-controls { position: absolute; bottom: 24px; right: 24px; z-index: 30; display: flex; flex-direction: column; gap: 8px; background: rgba(17,16,15,.7); padding: 8px; border-radius: 12px; border: 1px solid #484644; backdrop-filter: blur(10px); }
+    .canvas-btn { background: #252423; color: #a19f9d; border: 1px solid #484644; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; transition: all .3s; }
+    .canvas-btn:hover { background: var(--az-blue); color: white; border-color: var(--az-blue); transform: scale(1.1); }
+
+    /* Interactive Blade Overlay */
+    .blade-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); backdrop-filter: blur(5px); z-index: 90; opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+    .blade-overlay.active { opacity: 1; pointer-events: auto; }
+    .blade-panel { position: fixed; top: 0; right: -860px; width: 100%; max-width: 450px; height: 100vh; background: rgba(255,255,255,0.98); backdrop-filter: blur(20px); box-shadow: -10px 0 40px rgba(0,0,0,.2); z-index: 100; transition: right .5s cubic-bezier(0.16, 1, 0.3, 1); display: flex; flex-direction: column; }
+    .blade-panel.active { right: 0; }
+    .blade-header { padding: 1.5rem 2rem; border-bottom: 1px solid var(--ms-border); display: flex; justify-content: space-between; align-items: flex-start; background: transparent; }
+    .blade-body { padding: 2rem; overflow-y: auto; flex-grow: 1; }
+    .ado-tag { font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 4px; text-transform: uppercase; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+
+  <!-- GLOBAL BACKGROUND EFFECTS -->
+  <div class="bg-orbs">
+    <div class="orb-1"></div>
+    <div class="orb-2"></div>
+  </div>
+
+  <!-- SLIDES CONTROLS -->
+  <div class="controls">
+    <button onclick="prevSlide()" id="btnPrev" disabled><i class="fas fa-chevron-left"></i></button>
+    <div class="slide-indicator"><span id="currentSlideNum">1</span> / <span id="totalSlidesNum">8</span></div>
+    <button onclick="nextSlide()" id="btnNext"><i class="fas fa-chevron-right"></i></button>
+  </div>
+
+  <!-- SLIDES CONTAINER -->
+  <div id="slides-container">
+
+    <!-- SLIDE 1: INTRO -->
+    <div class="slide active">
+      <div class="flex-grow flex flex-col justify-center max-w-6xl mx-auto w-full">
+        
+        <div class="stagger-1 inline-flex items-center space-x-3 bg-white/80 backdrop-blur-md px-5 py-3 rounded-full text-sm font-bold uppercase mb-8 border border-[#E1DFDD] shadow-sm self-start">
+          <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6">
+            <rect x="8" y="16" width="32" height="32" rx="8" fill="url(#grad1)" fill-opacity="0.85" style="mix-blend-mode: multiply;"/>
+            <rect x="24" y="16" width="32" height="32" rx="8" fill="url(#grad2)" fill-opacity="0.85" style="mix-blend-mode: multiply;"/>
+            <circle cx="32" cy="32" r="6" fill="#FFFFFF" opacity="0.9" />
+            <defs>
+              <linearGradient id="grad1" x1="8" y1="16" x2="40" y2="48" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#1094D2" />
+                <stop offset="1" stop-color="#6C35D4" />
+              </linearGradient>
+              <linearGradient id="grad2" x1="24" y1="16" x2="56" y2="48" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#C62287" />
+                <stop offset="1" stop-color="#D83B01" />
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="text-[#201F1E]">Nexus Insight <span class="text-[#605E5C] font-normal tracking-normal text-xs ml-2">| Microsoft Innovation Challenge - March 2026</span></span>
+        </div>
+
+        <h1 class="stagger-2 text-6xl lg:text-7xl font-bold text-[#201F1E] leading-tight mb-8 tracking-tight">
+          Analytical AI <br/>
+          <span class="ai-text">with Measured Results</span>
+        </h1>
+        <p class="stagger-3 text-2xl text-[#605E5C] max-w-3xl leading-relaxed mb-12 font-light">
+          We transform business questions into actionable executive answers through a secure, self-correcting, and auditable multi-agent architecture.
+        </p>
+        <div class="stagger-4 flex gap-8">
+          <div class="flex items-center gap-3 text-lg font-semibold text-[#201F1E]"><i class="fas fa-shield-check text-[#7FBA00] text-3xl"></i> Enterprise Security</div>
+          <div class="flex items-center gap-3 text-lg font-semibold text-[#201F1E]"><i class="fas fa-bolt text-[#0078D4] text-3xl"></i> Low Latency</div>
+          <div class="flex items-center gap-3 text-lg font-semibold text-[#201F1E]"><i class="fas fa-microchip text-[#5C2D91] text-3xl"></i> Cloud-Native</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 2: BRANDING -->
+    <div class="slide">
+      <div class="max-w-6xl mx-auto w-full h-full flex flex-col justify-center items-center">
+        <div class="relative w-full max-w-5xl">
+          <div class="stagger-1 absolute -inset-1 bg-gradient-to-r from-[#1094D2] via-[#6C35D4] to-[#C62287] rounded-[2.5rem] blur-2xl opacity-40 animate-slow-pulse"></div>
+          
+          <div class="stagger-2 relative bg-white/80 backdrop-blur-3xl border border-white p-12 lg:p-16 rounded-[2.5rem] shadow-2xl text-center">
+            
+            <div class="flex justify-center mb-10">
+              <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-28 h-28 transform hover:scale-110 transition-transform duration-700">
+                <rect x="8" y="16" width="32" height="32" rx="10" fill="url(#grad1_big)" fill-opacity="0.85" style="mix-blend-mode: multiply;"/>
+                <rect x="24" y="16" width="32" height="32" rx="10" fill="url(#grad2_big)" fill-opacity="0.85" style="mix-blend-mode: multiply;"/>
+                <circle cx="32" cy="32" r="7" fill="#FFFFFF" opacity="0.95" />
+                <defs>
+                  <linearGradient id="grad1_big" x1="8" y1="16" x2="40" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#1094D2" />
+                    <stop offset="1" stop-color="#6C35D4" />
+                  </linearGradient>
+                  <linearGradient id="grad2_big" x1="24" y1="16" x2="56" y2="48" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#C62287" />
+                    <stop offset="1" stop-color="#D83B01" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            
+            <h2 class="stagger-3 text-5xl font-bold text-[#201F1E] mb-6 tracking-tight">The <span class="ai-text">Nexus Insight</span> Identity</h2>
+            <p class="stagger-3 text-xl text-[#605E5C] mb-12 max-w-2xl mx-auto leading-relaxed">More than a tool. A paradigm shift bridging the gap between fluid human intent and rigid enterprise data.</p>
+            
+            <div class="stagger-4 grid grid-cols-1 md:grid-cols-2 gap-8 text-left mt-8">
+              <div class="p-8 bg-white/90 rounded-2xl shadow-sm border border-[#E1DFDD] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-[#1094D2] opacity-10 rounded-bl-full"></div>
+                <h3 class="text-2xl font-bold text-[#0078D4] mb-3"><i class="fas fa-network-wired mr-2"></i> Nexus</h3>
+                <p class="text-[#605E5C] leading-relaxed font-medium">The central connection point. We seamlessly link disparate, complex relational schemas directly to the user's natural language.</p>
+              </div>
+              <div class="p-8 bg-white/90 rounded-2xl shadow-sm border border-[#E1DFDD] hover:shadow-lg transition-all duration-300 transform hover:-translate-y-2 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-[#C62287] opacity-10 rounded-bl-full"></div>
+                <h3 class="text-2xl font-bold text-[#C62287] mb-3"><i class="fas fa-lightbulb mr-2"></i> Insight</h3>
+                <p class="text-[#605E5C] leading-relaxed font-medium">The ultimate outcome. We don't just execute SQL and return raw tables. We synthesize data into polished, actionable executive intelligence.</p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 3: HACKATHON CRITERIA -->
+    <div class="slide">
+      <div class="max-w-6xl mx-auto w-full h-full flex flex-col justify-center">
+        <h2 class="stagger-1 text-4xl font-light mb-10">Designed for <span class="font-bold ai-text">Impact (Judging Criteria)</span></h2>
+        <div class="grid grid-cols-2 gap-8">
+          <div class="stagger-2 fluent-card border-t-4 border-t-[#0078D4] p-8">
+            <h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-tachometer-alt mr-3 text-[#0078D4] text-2xl"></i> 25% Performance (Measurable)</h3>
+            <p class="text-[#605E5C] leading-relaxed">Not just a proof of concept. We validated a <strong>62.5% reduction in tokens</strong> and <strong>50.5% in P50 latency</strong> using a Multi-Agent pipeline with schema caches and fast-tracks.</p>
+          </div>
+          <div class="stagger-2 fluent-card border-t-4 border-t-[#C62287] p-8">
+            <h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-lightbulb mr-3 text-[#C62287] text-2xl"></i> 25% Innovation</h3>
+            <p class="text-[#605E5C] leading-relaxed">Grounded in the <strong>MAC-SQL</strong> paradigm. We divide Text-to-SQL complexity into specialized roles, creatively overcoming the context limits of monolithic models.</p>
+          </div>
+          <div class="stagger-3 fluent-card border-t-4 border-t-[#7FBA00] p-8">
+            <h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-hands-holding-circle mr-3 text-[#7FBA00] text-2xl"></i> 25% Responsible AI</h3>
+            <p class="text-[#605E5C] leading-relaxed">Strict alignment with Microsoft's 6 AI principles: Guaranteed blocking of injections, Human-in-the-Loop workflows, and forensic W3C Traceability.</p>
+          </div>
+          <div class="stagger-3 fluent-card border-t-4 border-t-[#00A4EF] p-8">
+            <h3 class="text-xl font-bold mb-4 flex items-center"><i class="fas fa-cloud mr-3 text-[#00A4EF] text-2xl"></i> 25% Azure Ecosystem</h3>
+            <p class="text-[#605E5C] leading-relaxed">Production-grade architecture. Seamlessly orchestrates Azure Container Apps, Entra ID, AI Foundry, Azure SQL, Key Vault, Web PubSub, and App Insights via Bicep.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 4: MULTI-AGENT APPROACH (OUR FLOW + MAC-SQL THEORY) -->
+    <div class="slide">
+      <div class="max-w-7xl mx-auto w-full h-full flex flex-col justify-center">
+        <h2 class="stagger-1 text-4xl font-light mb-4">Agent Flow: <span class="font-bold ai-text">Efficiency by Design</span></h2>
+        <p class="stagger-1 text-lg text-[#605E5C] mb-10">Theoretically inspired by <i>MAC-SQL</i> research, each stage of our architecture exists to reduce costs, improve accuracy, or protect execution.</p>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          <div class="lg:col-span-4 flex flex-col gap-6">
+            <div class="stagger-2 bg-white/80 backdrop-blur-md p-8 rounded-2xl border border-[#E1DFDD] shadow-sm border-t-4 border-t-[#E81123]">
+              <h3 class="font-bold text-[#E81123] text-xl mb-4 flex items-center"><i class="fas fa-triangle-exclamation mr-3"></i>Root Problem</h3>
+              <p class="text-[15px] text-[#605E5C] leading-relaxed">Enterprise Text-to-SQL combines high natural language ambiguity with extreme relational schema rigidity. If a monolithic agent attempts to solve everything, errors, latency, and token costs soar.</p>
+            </div>
+            <div class="stagger-3 bg-gradient-to-br from-[#1094D2] to-[#5C2D91] p-8 rounded-2xl text-white shadow-lg">
+              <h3 class="font-bold text-xl mb-4 flex items-center"><i class="fas fa-sitemap mr-3"></i>Design Principle</h3>
+              <p class="text-[15px] opacity-95 leading-relaxed">Decompose into agents with bounded responsibilities + stage telemetry + secure execution to iterate with empirical evidence.</p>
+            </div>
+          </div>
+
+          <div class="stagger-4 lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div class="fluent-card p-6 border-l-4 border-l-[#5C2D91]">
+              <h3 class="font-bold text-lg mb-2 text-[#201F1E]">1) Planner + Short-Circuit</h3>
+              <p class="text-[14px] text-[#605E5C]">Cuts early if it detects a simple chat and jumps straight to Evaluator. Avoids full SQL stages when they add no value.</p>
+            </div>
+            <div class="fluent-card p-6 border-l-4 border-l-[#0078D4]">
+              <h3 class="font-bold text-lg mb-2 text-[#201F1E]">2) Librarian Cache (TTL 300s)</h3>
+              <p class="text-[14px] text-[#605E5C]">Reuses catalog and enriched schema (Semantic Pruning) to reduce repeated round-trips to SQL metadata.</p>
+            </div>
+            <div class="fluent-card p-6 border-l-4 border-l-[#E81123]">
+              <h3 class="font-bold text-lg mb-2 text-[#201F1E]">3) Critic + Execution</h3>
+              <p class="text-[14px] text-[#605E5C]">Blocks DDL/DML. If it fails, it feeds the error back to the Coder and retries guided by real execution (max 2).</p>
+            </div>
+            <div class="fluent-card p-6 border-l-4 border-l-[#008272]">
+              <h3 class="font-bold text-lg mb-2 text-[#201F1E]">4) Fast-Track</h3>
+              <p class="text-[14px] text-[#605E5C]">Reuses results from repeated queries dynamically, achieving a 50% hit-rate in real-world tests.</p>
+            </div>
+            <div class="fluent-card p-6 border-l-4 border-l-[#B26B00] md:col-span-2">
+              <h3 class="font-bold text-lg mb-2 text-[#201F1E]">5) Streaming + Transparency</h3>
+              <p class="text-[14px] text-[#605E5C]">The backend emits deltas with transparency metadata: timings per stage, SQL generated, and live rows processed.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 5: PERFORMANCE -->
+    <div class="slide">
+      <div class="max-w-6xl mx-auto w-full h-full flex flex-col justify-center">
+        <h2 class="stagger-1 text-4xl font-light mb-10">Performance: <span class="font-bold ai-text">Live & Synthetic Benchmarks</span></h2>
+        
+        <div class="grid grid-cols-2 gap-10">
+          <div class="stagger-2 fluent-card p-10">
+            <h3 class="text-3xl font-semibold mb-8">Real Scenario (Live Azure SQL)</h3>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              <div>
+                <div class="text-sm text-[#605E5C] uppercase font-bold tracking-wide">Variant A (Monolith)</div>
+                <div class="text-4xl text-gray-400 mt-2">32 <span class="text-xl">tokens avg</span></div>
+              </div>
+              <div>
+                <div class="text-sm text-[#605E5C] uppercase font-bold tracking-wide">Variant C (Nexus)</div>
+                <div class="text-5xl font-bold text-[#5C2D91] mt-2">12 <span class="text-xl">tokens avg</span></div>
+              </div>
+            </div>
+            <div class="w-full bg-gray-200 h-6 rounded-full overflow-hidden flex">
+              <div class="bg-gradient-to-r from-[#5C2D91] to-[#C62287] h-full" style="width: 37.5%"></div>
+            </div>
+            <p class="mt-6 text-[#605E5C] font-semibold text-lg"><i class="fas fa-arrow-down text-[#7FBA00]"></i> 62.5% Reduction in Computational Cost</p>
+          </div>
+
+          <div class="stagger-3 fluent-card p-10">
+            <h3 class="text-3xl font-semibold mb-8">Synthetic Scenario (Latency)</h3>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              <div>
+                <div class="text-sm text-[#605E5C] uppercase font-bold tracking-wide">P50 Baseline</div>
+                <div class="text-4xl text-gray-400 mt-2">2760 <span class="text-xl">ms</span></div>
+              </div>
+              <div>
+                <div class="text-sm text-[#605E5C] uppercase font-bold tracking-wide">P50 Nexus Insight</div>
+                <div class="text-5xl font-bold text-[#0078D4] mt-2">1365 <span class="text-xl">ms</span></div>
+              </div>
+            </div>
+            <div class="w-full bg-gray-200 h-6 rounded-full overflow-hidden flex">
+              <div class="bg-gradient-to-r from-[#0078D4] to-[#1094D2] h-full" style="width: 49.5%"></div>
+            </div>
+            <p class="mt-6 text-[#605E5C] font-semibold text-lg"><i class="fas fa-arrow-down text-[#7FBA00]"></i> 50.5% Reduction in user wait time</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 6: SECURITY -->
+    <div class="slide">
+      <div class="max-w-6xl mx-auto w-full h-full flex flex-col justify-center">
+        <h2 class="stagger-1 text-4xl font-light mb-10">Responsible AI: <span class="font-bold ai-text">Microsoft's 6 Principles</span></h2>
+        
+        <div class="grid grid-cols-3 gap-8">
+          <div class="stagger-2 bg-white/90 backdrop-blur-md p-8 rounded-2xl border border-red-100 shadow-lg border-t-4 border-t-[#E81123] transform transition hover:-translate-y-2">
+            <div class="text-5xl text-[#E81123] mb-6"><i class="fas fa-shield-alt"></i></div>
+            <h3 class="text-xl font-bold mb-3 text-[#201F1E]">Reliability & Safety</h3>
+            <p class="text-[15px] text-[#605E5C] leading-relaxed">Our <i>Critic</i> Agent acts as a firewall, validating 100% of queries. Integrated natively with <strong>Azure AI Content Safety</strong> to prevent prompt jailbreaks and ensure totally safe operations.</p>
+          </div>
+          <div class="stagger-3 bg-white/90 backdrop-blur-md p-8 rounded-2xl border border-teal-100 shadow-lg border-t-4 border-t-[#008272] transform transition hover:-translate-y-2">
+            <div class="text-5xl text-[#008272] mb-6"><i class="fas fa-user-lock"></i></div>
+            <h3 class="text-xl font-bold mb-3 text-[#201F1E]">Privacy & Accountability</h3>
+            <p class="text-[15px] text-[#605E5C] leading-relaxed">Built on <strong>Entra ID</strong> for robust identity management. The Human-In-The-Loop workflow guarantees that a real human is strictly accountable for executing high-impact queries.</p>
+          </div>
+          <div class="stagger-4 bg-white/90 backdrop-blur-md p-8 rounded-2xl border border-orange-100 shadow-lg border-t-4 border-t-[#B26B00] transform transition hover:-translate-y-2">
+            <div class="text-5xl text-[#B26B00] mb-6"><i class="fas fa-magnifying-glass"></i></div>
+            <h3 class="text-xl font-bold mb-3 text-[#201F1E]">Transparency & Inclusion</h3>
+            <p class="text-[15px] text-[#605E5C] leading-relaxed">Every token is tracked using W3C Trace Contexts in <strong>Log Analytics</strong>. Plus, our architecture sets the foundation for true accessibility utilizing seamless voice integrations.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 7: ARCHITECTURE CANVAS -->
+    <div class="slide" style="padding: 2rem 4rem;">
+      <div class="flex flex-col h-full w-full max-w-[1400px] mx-auto">
+        <div class="stagger-1 mb-4 flex justify-between items-end">
+          <div>
+            <h1 class="text-3xl font-light text-[#201F1E] mb-1">End-to-End Architecture <span class="text-sm bg-gradient-to-r from-blue-100 to-purple-100 px-3 py-1 rounded-full ml-2 font-bold text-[#5C2D91] shadow-sm"><i class="fas fa-hand-pointer mr-1"></i> Interactive</span></h1>
+            <p class="text-[#605E5C] text-sm">Docker deployment in Azure Container Apps, CI/CD, Agent Framework, and Identity. Click on nodes, scroll to zoom, and drag to explore.</p>
+          </div>
+        </div>
+
+        <div class="stagger-2 flex-grow relative rounded-2xl overflow-hidden shadow-2xl border border-[#323130]" style="min-height: 0;">
+          <div class="az-viewport" id="viewport">
+            <div class="canvas-controls">
+              <button class="canvas-btn" onclick="zoom(0.1)" title="Zoom In"><i class="fas fa-plus"></i></button>
+              <button class="canvas-btn" onclick="zoom(-0.1)" title="Zoom Out"><i class="fas fa-minus"></i></button>
+              <button class="canvas-btn" onclick="resetTransform()" title="Fit to Screen"><i class="fas fa-compress"></i></button>
+            </div>
+
+            <div class="az-canvas-inner" id="canvas-inner">
+              <!-- Bounding Boxes -->
+              <div class="az-boundary" style="top: 50px; left: 80px; width: 440px; height: 140px; border-color: #24292F50;"><span class="boundary-label text-[#24292F]">CI/CD & IaC</span></div>
+              <div class="az-boundary" style="top: 50px; left: 560px; width: 440px; height: 140px; border-color: #0078D450;"><span class="boundary-label text-[#0078D4]">Identity & Security</span></div>
+              <div class="az-boundary" style="top: 250px; left: 80px; width: 440px; height: 350px; border-color: #00827250;"><span class="boundary-label text-[#008272]">Azure Container Apps (Docker)</span></div>
+              <div class="az-boundary" style="top: 250px; left: 560px; width: 850px; height: 460px; border-color: #C6228750;"><span class="boundary-label text-[#C62287]">Azure AI Foundry & Agent Framework</span></div>
+              <div class="az-boundary" style="top: 350px; left: 1480px; width: 240px; height: 140px; border-color: #00A4EF50;"><span class="boundary-label text-[#00A4EF]">Data Layer</span></div>
+              <div class="az-boundary" style="top: 760px; left: 560px; width: 850px; height: 150px; border-color: #B26B0050;"><span class="boundary-label text-[#B26B00]">Observability & Benchmarking</span></div>
+
+              <!-- SVG Connections -->
+              <svg class="svg-pipeline">
+                <defs>
+                  <marker id="arrow-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--az-blue)" /></marker>
+                  <marker id="arrow-ai" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#C62287" /></marker>
+                  <marker id="arrow-alert" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#E81123" /></marker>
+                  <marker id="arrow-tel" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#B26B00" /></marker>
+                  <marker id="arrow-infra" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" fill="#a19f9d" /></marker>
+                </defs>
+                <!-- Static Paths -->
+                <path d="M 190 160 L 190 290" class="path-bg" /><path d="M 410 160 L 410 290" class="path-bg" /><path d="M 670 160 L 670 290" class="path-bg" /><path d="M 880 160 L 880 290" class="path-bg" />
+                <path d="M 190 360 L 190 420" class="path-bg" /><path d="M 280 325 L 320 325" class="path-bg" /><path d="M 280 455 L 490 455 L 490 325 L 590 325" class="path-bg" />
+                <path d="M 790 325 L 840 325" class="path-bg" /><path d="M 1040 325 L 1090 325" class="path-bg" /><path d="M 1290 325 L 1400 325 L 1400 420 L 1510 420" class="path-bg" />
+                <path d="M 1510 435 L 1420 435 L 1420 435 L 1290 435" class="path-bg" />
+                <path d="M 1190 460 L 1190 510" class="path-bg" /><path d="M 1190 580 L 1190 620" class="path-bg" />
+                <path d="M 1090 545 L 1060 545 L 1060 435 L 1090 435" class="path-bg" /><path d="M 1090 655 L 980 655 L 980 580" class="path-bg" />
+                <path d="M 940 360 L 940 510" class="path-bg" /><path d="M 690 360 L 690 510" class="path-bg" />
+                <path d="M 690 580 L 690 800" class="path-bg" /><path d="M 790 545 L 820 545 L 820 800 L 940 800" class="path-bg" />
+                <path d="M 690 580 L 690 730 L 1190 730 L 1190 800" class="path-bg" />
+
+                <!-- Animated Paths -->
+                <path d="M 190 160 L 190 290" class="path-infra" marker-end="url(#arrow-infra)" /><path d="M 410 160 L 410 290" class="path-infra" marker-end="url(#arrow-infra)" />
+                <path d="M 670 160 L 670 290" class="path-data" marker-end="url(#arrow-data)" /><path d="M 880 160 L 880 290" class="path-data" marker-end="url(#arrow-data)" />
+                <path d="M 190 360 L 190 420" class="path-data" marker-end="url(#arrow-data)" /><path d="M 280 325 L 320 325" class="path-data" marker-end="url(#arrow-data)" />
+                <path d="M 280 455 L 490 455 L 490 325 L 590 325" class="path-data" marker-end="url(#arrow-data)" />
+                <path d="M 790 325 L 840 325" class="path-ai" marker-end="url(#arrow-ai)" /><path d="M 1040 325 L 1090 325" class="path-ai" marker-end="url(#arrow-ai)" />
+                <path d="M 1290 325 L 1400 325 L 1400 420 L 1510 420" class="path-data" marker-end="url(#arrow-data)" /><path d="M 1510 435 L 1420 435 L 1420 435 L 1290 435" class="path-data" marker-end="url(#arrow-data)" />
+                <path d="M 1190 460 L 1190 510" class="path-data" marker-end="url(#arrow-data)" /><path d="M 1190 580 L 1190 620" class="path-data" marker-end="url(#arrow-data)" />
+                <path d="M 1090 545 L 1060 545 L 1060 435 L 1090 435" class="path-alert" marker-end="url(#arrow-alert)" /><path d="M 1090 655 L 980 655 L 980 580" class="path-data" marker-end="url(#arrow-data)" />
+                <path d="M 940 360 L 940 510" class="path-ai" marker-end="url(#arrow-ai)" /><path d="M 690 360 L 690 510" class="path-event" marker-end="url(#arrow-data)" />
+                <path d="M 690 580 L 690 800" class="path-tel" marker-end="url(#arrow-tel)" /><path d="M 790 545 L 820 545 L 820 800 L 940 800" class="path-tel" marker-end="url(#arrow-tel)" />
+                <path d="M 690 580 L 690 730 L 1190 730 L 1190 800" class="path-tel" marker-end="url(#arrow-tel)" />
+              </svg>
+
+              <!-- Nodes -->
+              <!-- DevOps -->
+              <div class="az-node n-github" style="top: 90px; left: 100px; width: 180px;" onclick="openBlade('githubactions')"><div class="az-node-header"><div class="az-node-icon bg-[#24292F]"><i class="fab fa-github text-white"></i></div><h4 class="font-bold text-[13px]">GitHub Actions</h4></div><p class="text-[10px] text-[#A19F9D]">CI/CD pipelines</p></div>
+              <div class="az-node n-bicep" style="top: 90px; left: 320px; width: 180px;" onclick="openBlade('bicep')"><div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-file-code text-white"></i></div><h4 class="font-bold text-[13px]">Bicep (IaC)</h4></div><p class="text-[10px] text-[#A19F9D]">Infra as Code</p></div>
+              <!-- Security -->
+              <div class="az-node n-entra" style="top: 90px; left: 580px; width: 180px;" onclick="openBlade('entra')"><div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-id-badge text-white"></i></div><h4 class="font-bold text-[13px]">Entra ID</h4></div><p class="text-[10px] text-[#A19F9D]">Authentication & RBAC</p></div>
+              <div class="az-node n-kv" style="top: 90px; left: 790px; width: 180px;" onclick="openBlade('keyvault')"><div class="az-node-header"><div class="az-node-icon bg-[#B4009E]"><i class="fas fa-key text-white"></i></div><h4 class="font-bold text-[13px]">Azure Key Vault</h4></div><p class="text-[10px] text-[#A19F9D]">Secrets & AI Keys</p></div>
+              <!-- Containers -->
+              <div class="az-node n-nextjs" style="top: 290px; left: 100px; width: 180px;" onclick="openBlade('nextjs')"><div class="az-node-header"><div class="az-node-icon bg-[#201F1E]"><i class="fab fa-react text-white"></i></div><h4 class="font-bold text-[13px]">Next.js Frontend</h4></div><p class="text-[10px] text-[#A19F9D]">UI Container</p></div>
+              <div class="az-node n-redis" style="top: 290px; left: 320px; width: 180px;" onclick="openBlade('redis')"><div class="az-node-header"><div class="az-node-icon bg-[#DC382D]"><i class="fas fa-database text-white"></i></div><h4 class="font-bold text-[13px]">Redis Cache</h4></div><p class="text-[10px] text-[#A19F9D]">Chat history container</p></div>
+              <div class="az-node n-teal" style="top: 420px; left: 100px; width: 180px;" onclick="openBlade('fastapi')"><div class="az-node-header"><div class="az-node-icon bg-[#008272]"><i class="fab fa-python text-white"></i></div><h4 class="font-bold text-[13px]">Python FastAPI</h4></div><p class="text-[10px] text-[#A19F9D]">Backend API</p></div>
+              <!-- AI Core -->
+              <div class="az-node n-blue" style="top: 290px; left: 590px; width: 200px;" onclick="openBlade('pubsub')"><div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-broadcast-tower text-white"></i></div><h4 class="font-bold text-[13px]">Azure Web PubSub</h4></div><p class="text-[10px] text-[#A19F9D]">Streaming WSS</p></div>
+              <div class="az-node n-ai-core" style="top: 290px; left: 840px; width: 200px;" onclick="openBlade('planner')"><div class="az-node-header"><div class="az-node-icon bg-[#C62287]"><i class="fas fa-route text-white"></i></div><h4 class="font-bold text-[13px] ai-text">Planner Agent</h4></div><p class="text-[10px] text-[#A19F9D]">Router & Short-circuit</p></div>
+              <div class="az-node n-purple" style="top: 290px; left: 1090px; width: 200px;" onclick="openBlade('librarian')"><div class="az-node-header"><div class="az-node-icon bg-[#5C2D91]"><i class="fas fa-book text-white"></i></div><h4 class="font-bold text-[13px]">Librarian Agent</h4></div><p class="text-[10px] text-[#A19F9D]">SQL schema cache</p></div>
+              <div class="az-node n-blue" style="top: 390px; left: 1090px; width: 200px;" onclick="openBlade('coder')"><div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-code text-white"></i></div><h4 class="font-bold text-[13px]">SQL Coder Agent</h4></div><p class="text-[10px] text-[#A19F9D]">Generation in Foundry</p></div>
+              <div class="az-node n-red" style="top: 510px; left: 1090px; width: 200px;" onclick="openBlade('critic')"><div class="az-node-header"><div class="az-node-icon bg-[#E81123]"><i class="fas fa-shield-halved text-white"></i></div><h4 class="font-bold text-[13px]">Critic Agent</h4></div><p class="text-[10px] text-[#A19F9D]">Zero-trust DDL blocker</p></div>
+              <div class="az-node n-teal" style="top: 620px; left: 1090px; width: 200px;" onclick="openBlade('execution')"><div class="az-node-header"><div class="az-node-icon bg-[#008272]"><i class="fas fa-play text-white"></i></div><h4 class="font-bold text-[13px]">SQLExecution</h4></div><p class="text-[10px] text-[#A19F9D]">DB Reader with Retries</p></div>
+              <div class="az-node n-blue" style="top: 510px; left: 840px; width: 200px;" onclick="openBlade('evaluator')"><div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-file-lines text-white"></i></div><h4 class="font-bold text-[13px]">Evaluator Agent</h4></div><p class="text-[10px] text-[#A19F9D]">Natural formatter</p></div>
+              <div class="az-node n-monitor" style="top: 510px; left: 590px; width: 200px;" onclick="openBlade('listener')"><div class="az-node-header"><div class="az-node-icon bg-[#B26B00]"><i class="fas fa-ear-listen text-white"></i></div><h4 class="font-bold text-[13px]">RealtimeListener</h4></div><p class="text-[10px] text-[#A19F9D]">Events status & telemetry</p></div>
+              <!-- DB -->
+              <div class="az-node n-sql" style="top: 390px; left: 1510px; width: 180px;" onclick="openBlade('azuresql')"><div class="az-node-header"><div class="az-node-icon bg-[#00A4EF]"><i class="fas fa-database text-white"></i></div><h4 class="font-bold text-[13px]">Azure SQL DB</h4></div><p class="text-[10px] text-[#A19F9D]">Transactional destination</p></div>
+              <!-- Telemetry -->
+              <div class="az-node n-appinsights" style="top: 800px; left: 590px; width: 200px;" onclick="openBlade('appinsights')"><div class="az-node-header"><div class="az-node-icon bg-[#8661C5]"><i class="fas fa-chart-line text-white"></i></div><h4 class="font-bold text-[13px]">App Insights</h4></div><p class="text-[10px] text-[#A19F9D]">APM, latencies, exceptions</p></div>
+              <div class="az-node n-loganalytics" style="top: 800px; left: 840px; width: 200px;" onclick="openBlade('loganalytics')"><div class="az-node-header"><div class="az-node-icon bg-[#0078D4]"><i class="fas fa-list text-white"></i></div><h4 class="font-bold text-[13px]">Log Analytics</h4></div><p class="text-[10px] text-[#A19F9D]">KQL logs and metrics</p></div>
+              <div class="az-node n-monitor" style="top: 800px; left: 1090px; width: 200px;" onclick="openBlade('benchmark')"><div class="az-node-header"><div class="az-node-icon bg-[#B26B00]"><i class="fas fa-gauge-high text-white"></i></div><h4 class="font-bold text-[13px]">Benchmark Engine</h4></div><p class="text-[10px] text-[#A19F9D]">Internal A/B analytics</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SLIDE 8: ROADMAP -->
+    <div class="slide">
+      <div class="max-w-7xl mx-auto w-full h-full flex flex-col justify-center">
+        <h2 class="stagger-1 text-4xl lg:text-5xl font-light mb-10 text-center">🚀 Future Vision: <span class="font-bold ai-text">Cloud-Native Ecosystem</span></h2>
+        
+        <!-- CURRENT -->
+        <div class="stagger-2 mb-10 bg-white/60 backdrop-blur-xl border border-white rounded-2xl p-6 flex flex-col md:flex-row items-center justify-between shadow-lg mx-auto w-full max-w-5xl">
+          <div class="flex items-center gap-4 mb-4 md:mb-0">
+            <div class="bg-[#201F1E] text-white p-4 rounded-full shadow-md"><i class="fas fa-check text-xl"></i></div>
+            <h3 class="font-semibold text-[#201F1E] text-xl">Established Foundation (Phase 1)</h3>
+          </div>
+          <div class="flex flex-wrap justify-center gap-6 text-[15px] text-[#605E5C] font-semibold">
+            <span class="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100"><i class="fab fa-docker text-[#0078D4]"></i> Container Apps</span>
+            <span class="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100"><i class="fas fa-database text-[#00A4EF]"></i> Azure SQL</span>
+            <span class="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100"><i class="fas fa-brain text-[#C62287]"></i> Agent Framework</span>
+            <span class="flex items-center gap-2 bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100"><i class="fas fa-shield-alt text-[#E81123]"></i> Zero-Trust Sec</span>
+          </div>
+        </div>
+
+        <!-- FUTURE CARDS -->
+        <div class="stagger-3 grid grid-cols-1 md:grid-cols-3 gap-8 pb-10">
+          
+          <!-- Card 1 -->
+          <div class="glow-border animate-float">
+            <div class="h-full bg-white/95 backdrop-blur-2xl rounded-2xl p-8 flex flex-col items-center text-center shadow-lg border border-[#E1DFDD]">
+              <div class="w-20 h-20 bg-gradient-to-br from-[#F2C811] to-[#D83B01] text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md">
+                <i class="fas fa-chart-pie"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-[#201F1E] mb-4">Extended Generation</h3>
+              <p class="text-[15px] text-[#605E5C] flex-grow leading-relaxed">Integration of <strong>Model Context Protocol (MCP)</strong> to automatically generate dynamic <strong>Power BI</strong> Dashboards, extract PDF reports, and build automated PowerPoint presentations.</p>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="glow-border animate-float-delay-1">
+            <div class="h-full bg-white/95 backdrop-blur-2xl rounded-2xl p-8 flex flex-col items-center text-center shadow-lg border border-[#E1DFDD]">
+              <div class="w-20 h-20 bg-gradient-to-br from-[#5C2D91] to-[#0078D4] text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md">
+                <i class="fas fa-universal-access"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-[#201F1E] mb-4">Comprehensive Inclusion</h3>
+              <p class="text-[15px] text-[#605E5C] flex-grow leading-relaxed">Native use of <strong>Azure AI Speech</strong> to democratize data: enabling spoken queries (Speech-to-Text) and reading executive reports out loud (Text-to-Speech).</p>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="glow-border animate-float-delay-2">
+            <div class="h-full bg-white/95 backdrop-blur-2xl rounded-2xl p-8 flex flex-col items-center text-center shadow-lg border border-[#E1DFDD]">
+              <div class="w-20 h-20 bg-gradient-to-br from-[#008272] to-[#7FBA00] text-white rounded-2xl flex items-center justify-center text-3xl mb-6 shadow-md">
+                <i class="fab fa-microsoft"></i>
+              </div>
+              <h3 class="text-2xl font-bold text-[#201F1E] mb-4">HITL & Teams Workflows</h3>
+              <p class="text-[15px] text-[#605E5C] flex-grow leading-relaxed">Approval of critical queries (Human-In-The-Loop) via Adaptive Cards in <strong>Teams</strong> for authorized users, and autonomous dispatches using Microsoft Graph API.</p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- End Slides Container -->
+
+  <!-- BLADE OVERLAY FOR CANVAS -->
+  <div class="blade-overlay" id="bladeOverlay" onclick="closeBlade()"></div>
+  <div class="blade-panel" id="bladePanel">
+    <div class="blade-header">
+      <div>
+        <span id="bladeTag" class="ado-tag bg-[#E1DFDD] text-[#201F1E] mb-2 inline-block">Detail</span>
+        <h2 id="bladeTitle" class="text-2xl font-light text-[#201F1E] mt-1">Component</h2>
+      </div>
+      <button onclick="closeBlade()" class="text-[#605E5C] hover:text-[#201F1E] p-2 bg-[#E1DFDD] rounded-full w-8 h-8 flex items-center justify-center transition"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="blade-body" id="bladeContent"></div>
+  </div>
+
+  <script>
+    // --- SLIDES LOGIC ---
+    let currentSlide = 0;
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    document.getElementById('totalSlidesNum').innerText = totalSlides;
+
+    function showSlide(index) {
+      if (index < 0) index = 0;
+      if (index >= totalSlides) index = totalSlides - 1;
+      
+      slides.forEach((s, i) => {
+        if (i === index) {
+          s.classList.add('active');
+        } else {
+          s.classList.remove('active');
+        }
+      });
+      currentSlide = index;
+      document.getElementById('currentSlideNum').innerText = currentSlide + 1;
+      
+      btnPrev.disabled = currentSlide === 0;
+      btnNext.disabled = currentSlide === totalSlides - 1;
+      
+      // Auto-fit canvas if on slide 7 (index 6)
+      if (currentSlide === 6) {
+        setTimeout(() => fitCanvasToViewport(), 100);
+      }
+    }
+
+    function nextSlide() { showSlide(currentSlide + 1); }
+    function prevSlide() { showSlide(currentSlide - 1); }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+      if (e.key === 'ArrowLeft') prevSlide();
+    });
+
+    // --- CANVAS ARCHITECTURE LOGIC ---
+    const viewport = document.getElementById('viewport');
+    const canvas = document.getElementById('canvas-inner');
+    const MIN_SCALE = 0.3; const MAX_SCALE = 2;
+    let scale = 1; let panX = 0; let panY = 0;
+    let isDragging = false; let startX = 0; let startY = 0;
+
+    function updateTransform() { if (canvas) canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`; }
+    
+    function zoom(delta) {
+      if (!viewport || !canvas) return;
+      scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, scale + delta));
+      updateTransform();
+    }
+
+    function getContentBounds() {
+      if (!canvas) return { minX: 0, minY: 0, maxX: 2400, maxY: 1400 };
+      const elements = canvas.querySelectorAll('.az-node, .az-boundary');
+      if (!elements.length) return { minX: 0, minY: 0, maxX: 2400, maxY: 1400 };
+
+      let minX = Number.POSITIVE_INFINITY, minY = Number.POSITIVE_INFINITY;
+      let maxX = Number.NEGATIVE_INFINITY, maxY = Number.NEGATIVE_INFINITY;
+
+      elements.forEach((el) => {
+        const style = window.getComputedStyle(el);
+        const left = parseFloat(style.left || '0');
+        const top = parseFloat(style.top || '0');
+        const width = parseFloat(style.width || `${el.offsetWidth}`);
+        const height = parseFloat(style.height || `${el.offsetHeight}`);
+        minX = Math.min(minX, left); minY = Math.min(minY, top);
+        maxX = Math.max(maxX, left + width); maxY = Math.max(maxY, top + height);
+      });
+      return { minX, minY, maxX, maxY };
+    }
+
+    function fitCanvasToViewport() {
+      if (!viewport) return;
+      const { minX, minY, maxX, maxY } = getContentBounds();
+      const contentWidth = Math.max(1, maxX - minX);
+      const contentHeight = Math.max(1, maxY - minY);
+
+      const padding = 80;
+      const availableW = Math.max(1, viewport.clientWidth - (padding * 2));
+      const availableH = Math.max(1, viewport.clientHeight - (padding * 2));
+
+      const fitScale = Math.min(availableW / contentWidth, availableH / contentHeight);
+      scale = Math.max(0.35, Math.min(1.2, fitScale));
+
+      panX = ((viewport.clientWidth - (contentWidth * scale)) / 2) - (minX * scale);
+      panY = ((viewport.clientHeight - (contentHeight * scale)) / 2) - (minY * scale);
+      updateTransform();
+    }
+
+    function resetTransform() { fitCanvasToViewport(); }
+
+    if (viewport) {
+      viewport.addEventListener('mousedown', e => {
+        if (e.target.closest('button') || e.target.closest('.az-node')) return;
+        isDragging = true;
+        startX = e.clientX - panX;
+        startY = e.clientY - panY;
+        if (canvas) canvas.style.transition = 'none';
+      });
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+        if (canvas) canvas.style.transition = 'transform 0.1s ease-out';
+      });
+      window.addEventListener('mousemove', e => {
+        if (!isDragging) return;
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+        updateTransform();
+      });
+      viewport.addEventListener('wheel', e => {
+        e.preventDefault();
+        zoom(e.deltaY > 0 ? -0.05 : 0.05);
+      }, { passive: false });
+    }
+
+    // --- BLADES INTERACTIVITY LOGIC ---
+    const bladeData = {
+      githubactions: { tag: 'CI/CD', title: 'GitHub Actions', content: '<p class="text-sm text-[#605E5C]">Continuous integration and deployment (CI/CD) pipeline. Builds Docker images, runs unit tests, and deploys updates to Azure Container Apps.</p>' },
+      bicep: { tag: 'IaC', title: 'Bicep', content: '<p class="text-sm text-[#605E5C]">All infrastructure in Azure is defined and deployed declaratively and repeatedly using Bicep templates, ensuring an environment identical to production.</p>' },
+      entra: { tag: 'Identity', title: 'Microsoft Entra ID', content: '<p class="text-sm text-[#605E5C]">Provides robust authentication and role-based access control (RBAC) protecting the internal ecosystem. Vital for Human-In-The-Loop flows.</p>' },
+      keyvault: { tag: 'Security', title: 'Azure Key Vault', content: '<p class="text-sm text-[#605E5C]">Centralized and secure store to protect transactional secrets, connectivity, and access keys for agents in AI Foundry.</p>' },
+      nextjs: { tag: 'Frontend / Container', title: 'Next.js App', content: '<p class="text-sm text-[#605E5C]">Deployed as a container in Azure Container Apps. Processes WebSockets to provide the user interface in real-time.</p>' },
+      redis: { tag: 'Cache / Container', title: 'Redis Cache', content: '<p class="text-sm text-[#605E5C]">Container in Azure Container Apps that stores chat histories and optimizes the load on the database Semantic Pruning (with a 5-minute TTL).</p>' },
+      fastapi: { tag: 'Backend / Container', title: 'Python FastAPI', content: '<p class="text-sm text-[#605E5C]">Asynchronous backend in Docker. Routes the multi-agent engine to Azure Foundry and manages Web PubSub connections.</p>' },
+      pubsub: { tag: 'Realtime', title: 'Azure Web PubSub', content: '<p class="text-sm text-[#605E5C]">Serverless websocket channel that allows broadcasting text deltas (streaming) and general pipeline status to the end user.</p>' },
+      listener: { tag: 'Telemetry', title: 'BackendRealtimeListener', content: '<p class="text-sm text-[#605E5C]">Backend module that receives and emits the progress of each agent and feeds overall telemetry to Application Insights live.</p>' },
+      planner: { tag: 'AI Agent', title: 'Planner Agent', content: '<p class="text-sm text-[#605E5C]">The orchestrating "brain". Defines the initial route and can short-circuit (send to evaluator directly) for greetings or light tasks, saving costs.</p>' },
+      librarian: { tag: 'AI Context', title: 'Librarian Agent', content: '<p class="text-sm text-[#605E5C]">Performs a semantic pruning of the SQL schema reading from cache. Prevents the LLM from receiving noise or unnecessary tables.</p>' },
+      coder: { tag: 'AI Generation', title: 'SQL Coder Agent', content: '<p class="text-sm text-[#605E5C]">Pure specialist in NL-to-SQL transformation. Responsible for assembling complex queries (CTEs, Joins, Window functions).</p>' },
+      critic: { tag: 'AI Security', title: 'Critic Agent', content: '<p class="text-sm text-[#605E5C]">Zero-Trust validator. Employs AI Content Safety and blocks DDL/DML commands. If it finds an error, it forces the Coder to fix it preventively.</p>' },
+      execution: { tag: 'Execution', title: 'SQLExecution', content: '<p class="text-sm text-[#605E5C]">Executor in a restricted (read-only) environment towards the Azure SQL database. Feeds back errors generated directly from the engine (Self-Correction).</p>' },
+      evaluator: { tag: 'AI Output', title: 'Evaluator Agent', content: '<p class="text-sm text-[#605E5C]">Receives the raw tabular output from the DB and converts it into an executive, summarized, and friendly text to be sent via Web PubSub to the user.</p>' },
+      azuresql: { tag: 'Data', title: 'Azure SQL Database', content: '<p class="text-sm text-[#605E5C]">Transactional business database, completely shielded and queried through read-only accounts during orchestration.</p>' },
+      appinsights: { tag: 'Observability', title: 'Application Insights', content: '<p class="text-sm text-[#605E5C]">Provides end-to-end APM (Application Performance Monitoring), profiling latencies, exceptions, and precise token interactions.</p>' },
+      loganalytics: { tag: 'Observability', title: 'Log Analytics', content: '<p class="text-sm text-[#605E5C]">Central and analytical workspace. Saves and normalizes logs from the Azure Container ecosystem, App Insights, and security flows.</p>' },
+      benchmark: { tag: 'Validation', title: 'Benchmark Engine', content: '<p class="text-sm text-[#605E5C]">Automated script suite from the framework that tests the pipeline against simulators (Synthetic) and live environments (Live) to prove A/B Performance.</p>' }
+    };
+
+    function openBlade(id) {
+      const data = bladeData[id] || { tag: 'Info', title: 'Detail', content: '<p class="text-sm">No content.</p>' };
+      const tagEl = document.getElementById('bladeTag');
+      tagEl.innerText = data.tag;
+      
+      if (data.tag.includes('AI') || data.tag.includes('Context') || data.tag.includes('Generation')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#F3D9EB] text-[#5C2D91]';
+      } else if (data.tag.includes('Realtime') || data.tag.includes('Container') || data.tag.includes('Backend') || data.tag.includes('Execution')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#D0E7E3] text-[#008272]';
+      } else if (data.tag.includes('Data')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#CCE4F7] text-[#0078D4]';
+      } else if (data.tag.includes('Security') || data.tag.includes('Identity')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#FDE7E9] text-[#E81123]';
+      } else if (data.tag.includes('CI/CD') || data.tag.includes('IaC')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#E1DFDD] text-[#24292F]';
+      } else if (data.tag.includes('Observability') || data.tag.includes('Validation') || data.tag.includes('Telemetry')) {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#FCE10040] text-[#8A6100]';
+      } else {
+        tagEl.className = 'ado-tag mb-2 inline-block bg-[#E1DFDD] text-[#201F1E]';
+      }
+
+      document.getElementById('bladeTitle').innerText = data.title;
+      document.getElementById('bladeContent').innerHTML = data.content;
+      document.getElementById('bladeOverlay').classList.add('active');
+      document.getElementById('bladePanel').classList.add('active');
+    }
+
+    function closeBlade() {
+      document.getElementById('bladeOverlay').classList.remove('active');
+      document.getElementById('bladePanel').classList.remove('active');
+    }
+
+    // Initialize first slide
+    showSlide(currentSlide);
+    window.addEventListener('resize', () => { if(currentSlide === 6) fitCanvasToViewport(); });
+  </script>
+</body>
+</html>

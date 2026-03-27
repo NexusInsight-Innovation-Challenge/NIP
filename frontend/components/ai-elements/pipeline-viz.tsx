@@ -243,7 +243,7 @@ export function PipelineVisualization({
                 : "border-purple-500/50 bg-gradient-to-r from-purple-50 to-purple-100/50 text-purple-700"
             }`}
           >
-            {route === "sql_pipeline" ? "SQLAgentX" : "Chat"}
+            {route === "sql_pipeline" ? "Nexus Insight" : "Chat"}
           </Badge>
           <div className="text-center">
             <span className={`text-xs font-bold ${statusColor}`}>

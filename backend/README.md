@@ -1,4 +1,4 @@
-# Azure Web PubSub + Agents Framework (Python) Demo
+# Azure Web PubSub + Microsoft Agent Framework
 
 Demo **plug-and-play** en Python para procesamiento de mensajes en tiempo real usando:
 
@@ -41,7 +41,7 @@ python-rt-agent-demo/
 
 ---
 
-## 2) Prerrequisitos
+## 2) Pre-requisitos
 
 - Python 3.11+
 - UV instalado (https://docs.astral.sh/uv/)

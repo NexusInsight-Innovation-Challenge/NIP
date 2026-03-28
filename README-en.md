@@ -33,3 +33,7 @@ An Azure-native solution (AI Foundry, Container Apps, SQL, Key Vault) deployed v
 * **The inmediate Road Ahead** include:
     - **Microsoft Teams** Adaptive Cards integration for autonomous approvals.
     - **Model Context Protocol (MCP)** to natively generate Power BI visualizations and executive PDF summaries.
+
+### 🏢 Architecture  
+
+<img src="docs/Architecture.png" width="100%" height="100%">   

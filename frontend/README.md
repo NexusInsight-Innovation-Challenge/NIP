@@ -1,3 +1,4 @@
+[English version](./README-en.md)
 # Innovation Challenge Chat | Azure Web PubSub + Next.js
 
 Interfaz visual de chat en tiempo real con pipeline de agentes y backend en Next.js App Router.
@@ -109,58 +110,19 @@ docker build --target runner -t innovation-chat:prod .
 docker run --rm -it -p 3000:3000 --env-file .env innovation-chat:prod
 ```
 
-## Despliegue en Azure Containers
-
-La imagen está preparada para ejecutar en `PORT=3000` y `HOSTNAME=0.0.0.0`.
-
-### Opción recomendada: Azure Container Apps
-
-1. Construye y publica la imagen en Azure Container Registry (ACR):
-
+### Desplegar imagen a Azure Wep App for Continers de manera simple
 ```bash
-az acr build \
-	--registry <ACR_NAME> \
-	--image innovation-chat:latest \
-	.
+# Cambiar modo al archivo simple-deploy.md
+$ chmod +x simple-deploy.md
+
+# Hacer login a azure con az CLI
+$ az login --tenant <TENANT-ID> or az login --use-device-code --tenant <TENANT_ID>
+
+# Ejecutar el script
+$ ./simple-deploy.md
 ```
 
-2. Crea o actualiza la app con la imagen y variables de entorno:
-
-```bash
-az containerapp up \
-	--name innovation-chat \
-	--resource-group <RESOURCE_GROUP> \
-	--environment <CONTAINER_APPS_ENV> \
-	--image <ACR_NAME>.azurecr.io/innovation-chat:latest \
-	--target-port 3000 \
-	--ingress external \
-	--env-vars \
-		AZURE_WEBPUBSUB_CONNECTION_STRING="<VALUE>" \
-		AZURE_WEBPUBSUB_HUB_NAME="agentshub" \
-		AZURE_WEBPUBSUB_GROUP="realtime-agent-room" \
-		NODE_ENV="production"
-```
-
-### Opción simple: Azure Container Instances (ACI)
-
-```bash
-az container create \
-	--resource-group <RESOURCE_GROUP> \
-	--name innovation-chat \
-	--image <ACR_NAME>.azurecr.io/innovation-chat:latest \
-	--registry-login-server <ACR_NAME>.azurecr.io \
-	--registry-username <ACR_USERNAME> \
-	--registry-password <ACR_PASSWORD> \
-	--dns-name-label <UNIQUE_DNS_LABEL> \
-	--ports 3000 \
-	--environment-variables \
-		AZURE_WEBPUBSUB_CONNECTION_STRING="<VALUE>" \
-		AZURE_WEBPUBSUB_HUB_NAME="agentshub" \
-		AZURE_WEBPUBSUB_GROUP="realtime-agent-room" \
-		NODE_ENV="production"
-```
-
-> Recomendación: en Azure usa secretos gestionados (Key Vault o secrets de Container Apps) para no exponer `AZURE_WEBPUBSUB_CONNECTION_STRING`.
+> Recomendación: en Azure usa secretos gestionados (Key Vault y/o secrets de Container Apps) para no exponer `AZURE_WEBPUBSUB_CONNECTION_STRING`.
 
 ## AZD (Azure Developer CLI)
 

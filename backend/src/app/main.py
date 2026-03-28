@@ -25,6 +25,7 @@ from app.logging_config import configure_logging
 from app.models import EnvelopeMetadata, EventType, MessageEnvelope, UserMessageInput
 from app.ms_agent_client import MicrosoftAgentFrameworkClient
 from app.pubsub_service import PubSubService
+from app.sensitivity_policy import SensitivityPolicy
 
 logger = logging.getLogger(__name__)
 settings = get_settings()
@@ -47,7 +48,8 @@ pipeline = AgentPipeline(
         EvaluatorAgent(ms_agent_client),
     ],
 )
-listener = BackendRealtimeListener(pubsub_service, pipeline, memory)
+sensitivity_policy = SensitivityPolicy(settings, ms_agent_client)
+listener = BackendRealtimeListener(pubsub_service, pipeline, sensitivity_policy, memory)
 
 
 @asynccontextmanager

@@ -33,7 +33,7 @@ const PIPELINE_STAGES: Record<string, StageConfig> = {
     icon: <BrainCircuitIcon className="size-4" />,
     color: "from-violet-500 to-purple-600",
     glowColor: "oklch(0.68 0.18 290)",
-    description: "Descompone la pregunta",
+    description: "Decomposes the question",
   },
   Librarian: {
     label: "Librarian",
@@ -47,28 +47,28 @@ const PIPELINE_STAGES: Record<string, StageConfig> = {
     icon: <CodeIcon className="size-4" />,
     color: "from-blue-500 to-indigo-600",
     glowColor: "oklch(0.72 0.19 250)",
-    description: "Genera SQL experto",
+    description: "Generates expert SQL",
   },
   Critic: {
     label: "Critic",
     icon: <ShieldCheckIcon className="size-4" />,
     color: "from-amber-500 to-orange-500",
     glowColor: "oklch(0.82 0.15 80)",
-    description: "Valida seguridad",
+    description: "Validates security",
   },
   Execution: {
     label: "Execution",
     icon: <PlayIcon className="size-4" />,
     color: "from-emerald-500 to-green-500",
     glowColor: "oklch(0.75 0.17 160)",
-    description: "Ejecuta queries",
+    description: "Executes queries",
   },
   Evaluator: {
     label: "Evaluator",
     icon: <SparklesIcon className="size-4" />,
     color: "from-pink-500 to-rose-500",
     glowColor: "oklch(0.65 0.2 340)",
-    description: "Reporte ejecutivo",
+    description: "Executive report",
   },
 };
 
@@ -197,12 +197,12 @@ export function PipelineVisualization({
   route,
 }: PipelineVisualizationProps) {
   const statusText = isError
-    ? "Error en pipeline"
+    ? "Pipeline error"
     : isCompleted
-      ? "Pipeline completado"
+      ? "Pipeline completed"
       : isProcessing
-        ? "Procesando..."
-        : "En espera";
+        ? "Processing..."
+        : "Idle";
 
   const statusColor = isError
     ? "text-red-600"
@@ -321,7 +321,7 @@ export function ExecutionTimeline({ stages, totalMs }: ExecutionTimelineProps) {
           Execution Timeline
         </p>
         <p className="text-xs text-foreground/60 font-medium">
-          Los timings aparecerán después de la primera respuesta.
+          Timings will appear after the first response.
         </p>
       </div>
     );
@@ -415,7 +415,7 @@ export function TransparencyPanel({
     <div className="glass-subtle rounded-2xl p-5 space-y-3 border border-gray-200/40">
       <div className="flex items-center justify-between pb-2 border-b border-gray-200/30">
         <p className="text-[11px] font-bold uppercase tracking-wider text-foreground/70">
-          Transparencia
+          Transparency
         </p>
         <Badge
           variant="outline"
@@ -432,16 +432,16 @@ export function TransparencyPanel({
       {/* Question */}
       <div className="rounded-lg bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/60 p-3 shadow-sm">
         <p className="text-[10px] font-bold text-blue-900 mb-1 uppercase tracking-wider">
-          Pregunta Analizada
+          Analyzed Question
         </p>
         <p className="text-xs text-blue-800/90 line-clamp-3 font-medium">
-          {question || "Sin pregunta registrada"}
+          {question || "No question registered"}
         </p>
       </div>
 
       {/* KPI Grid */}
       <div className="grid grid-cols-2 gap-2">
-        <MetricCard label="Filas" value={rowsReturned ?? "N/A"} />
+        <MetricCard label="Rows" value={rowsReturned ?? "N/A"} />
         <MetricCard
           label="Sub-queries"
           value={
@@ -459,17 +459,17 @@ export function TransparencyPanel({
           }
         />
         <MetricCard
-          label="Validación"
+          label="Validation"
           value={
             criticValidated != null
               ? criticValidated
                 ? "✅ OK"
-                : "❌ Falló"
+                : "❌ Failed"
               : "N/A"
           }
         />
         <MetricCard label="SQL (ms)" value={sqlExecutionMs ?? "N/A"} />
-        <MetricCard label="Fallback" value={fallback ? "Sí" : "No"} />
+        <MetricCard label="Fallback" value={fallback ? "Yes" : "No"} />
       </div>
 
       {/* Sub-query retry info */}
@@ -477,8 +477,8 @@ export function TransparencyPanel({
         <div className="rounded-lg bg-gradient-to-r from-amber-50 to-amber-100/50 border border-amber-300/50 p-2 shadow-sm">
           <p className="text-[10px] font-bold text-amber-900">
             ⚠️ {subQueriesFailed} sub-
-            {subQueriesFailed === 1 ? "query" : "queries"} requirieron
-            corrección
+            {subQueriesFailed === 1 ? "query" : "queries"} required
+            correction
           </p>
         </div>
       )}
@@ -488,7 +488,7 @@ export function TransparencyPanel({
         (subQueryCount ?? 0) > 1 && (
           <div className="rounded-lg bg-gradient-to-r from-emerald-50 to-emerald-100/50 border border-emerald-300/50 p-2 shadow-sm">
             <p className="text-[10px] font-bold text-emerald-900">
-              ✅ {subQueriesExecuted}/{subQueryCount} sub-queries exitosas
+              ✅ {subQueriesExecuted}/{subQueryCount} successful sub-queries
             </p>
           </div>
         )}
@@ -497,7 +497,7 @@ export function TransparencyPanel({
       {lastError && (
         <div className="rounded-lg bg-gradient-to-r from-red-50 to-red-100/50 border border-red-300/50 p-2 shadow-sm">
           <p className="text-[10px] font-bold text-red-900 mb-1">
-            ❌ Último error
+            ❌ Last error
           </p>
           <p className="text-[10px] text-red-800/80 line-clamp-3 font-medium">
             {lastError}
@@ -509,10 +509,10 @@ export function TransparencyPanel({
       <details className="group" open>
         <summary className="cursor-pointer text-[11px] font-bold text-foreground/70 flex items-center gap-2 mb-2 hover:text-foreground transition-colors">
           <ChevronRightIcon className="size-4 transition-transform group-open:rotate-90" />
-          SQL Ejecutado
+          SQL Executed
         </summary>
         <pre className="sql-block rounded-lg p-3 text-[11px] leading-5 max-h-36 overflow-auto whitespace-pre-wrap break-words border border-blue-200/50 bg-gradient-to-br from-blue-50 to-blue-50/80 text-blue-900 shadow-sm">
-          {sql || (route === "chat_pipeline" ? "N/A en ruta Chat" : "Sin SQL")}
+          {sql || (route === "chat_pipeline" ? "N/A in Chat route" : "No SQL")}
         </pre>
       </details>
 
@@ -523,7 +523,7 @@ export function TransparencyPanel({
           Preview JSON
         </summary>
         <pre className="sql-block rounded-lg p-3 text-[10px] leading-5 max-h-32 overflow-auto whitespace-pre-wrap break-words border border-gray-200/50 bg-gradient-to-br from-gray-50 to-gray-50/80 text-foreground/70 shadow-sm">
-          {preview || "Sin preview"}
+          {preview || "No preview"}
         </pre>
       </details>
     </div>

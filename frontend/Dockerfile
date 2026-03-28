@@ -23,22 +23,10 @@ FROM base AS runner
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV PORT=3000
-ENV REDIS_URL=redis://127.0.0.1:6379
-
-RUN apt-get update && \
-    apt-get install -y redis-server && \
-    rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 
-RUN echo '#!/bin/sh\n\
-echo "Iniciando Redis localmente..."\n\
-redis-server --daemonize yes\n\
-sleep 2\n\
-echo "Iniciando aplicacion Next.js..."\n\
-exec node server.js' > /app/start.sh && chmod +x /app/start.sh
-
 EXPOSE 3000
-CMD ["/app/start.sh"]
+CMD ["node", "server.js"]

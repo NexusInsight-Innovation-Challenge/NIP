@@ -44,7 +44,6 @@ import {
   WifiIcon,
   WifiOffIcon,
   ZapIcon,
-  PrinterIcon,
 } from "lucide-react";
 import {
   RealtimeNegotiateResponse,
@@ -134,7 +133,7 @@ const FIXED_MODEL = {
 };
 
 const INITIAL_ASSISTANT_CONTENT =
-  "Sistema listo. Esta interfaz usa Azure Web PubSub para mensajería en tiempo real con backend de agentes.";
+  "System ready. This interface uses Azure Web PubSub for real-time messaging with an agent-based backend.";
 
 const parseWebPubSubPayload = (event: MessageEvent<string>): unknown | null => {
   try {
@@ -162,7 +161,7 @@ const formatCloseDetail = (event: CloseEvent): string =>
 
 const normalizeStatusLabel = (status: RealtimeServerEvent): string => {
   if (status.type !== "status") {
-    return "Sin actividad";
+    return "No activity";
   }
 
   return status.message ?? status.status;
@@ -550,7 +549,7 @@ const normalizeRealtimeEvent = (
       correlationId,
       message:
         resolveString(rawPayload?.message) ??
-        "Consulta sensible detectada. Se requiere aprobación.",
+        "Sensitive query detected. Approval required.",
       reason: resolveString(rawPayload?.reason),
       categories,
       riskLevel: resolveString(rawPayload?.risk_level, rawPayload?.riskLevel),
@@ -578,7 +577,8 @@ const normalizeRealtimeEvent = (
     const approved =
       resolveBoolean(rawPayload?.approved) ??
       resolveString(rawPayload?.status) === "approved";
-    const statusRaw = resolveString(rawPayload?.status)?.toLowerCase() ?? "rejected";
+    const statusRaw =
+      resolveString(rawPayload?.status)?.toLowerCase() ?? "rejected";
     const status =
       statusRaw === "approved" || statusRaw === "expired"
         ? statusRaw
@@ -604,7 +604,7 @@ const normalizeRealtimeEvent = (
     const message =
       typeof rawPayload?.message === "string"
         ? rawPayload.message
-        : "Error reportado por backend";
+        : "Error reported by backend";
 
     return {
       type: "status",
@@ -639,7 +639,7 @@ const formatMessageTime = (timestamp: string): string => {
     return "";
   }
 
-  return new Intl.DateTimeFormat("es-MX", {
+  return new Intl.DateTimeFormat("en-US", {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
@@ -651,7 +651,7 @@ const buildInitialAssistantContent = (suggestions: string[]): string => {
   }
 
   const renderedSuggestions = suggestions.map((item) => `- ${item}`).join("\n");
-  return `${INITIAL_ASSISTANT_CONTENT}\n\nSugerencias iniciales:\n${renderedSuggestions}`;
+  return `${INITIAL_ASSISTANT_CONTENT}\n\nInitial suggestions:\n${renderedSuggestions}`;
 };
 
 const createInitialAssistantMessage = (content: string): ChatMessage => ({
@@ -706,13 +706,6 @@ const parseStageTiming = (
     .filter((entry) => Number.isFinite(entry.ms));
 };
 
-const cleanMessageContent = (content: string) => {
-  if (!content) return content;
-  const trimmed = content.trim();
-  const match = trimmed.match(/^```[a-z]*\s+([\s\S]*?)```$/i);
-  return match ? match[1].trim() : content;
-};
-
 function HomePageClient() {
   const { data: session } = useSession();
   const [isClientMounted, setIsClientMounted] = useState(false);
@@ -721,7 +714,7 @@ function HomePageClient() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [socketStatus, setSocketStatus] =
     useState<SocketStatus>("disconnected");
-  const [agentStatus, setAgentStatus] = useState("Sin actividad");
+  const [agentStatus, setAgentStatus] = useState("No activity");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAssistantThinking, setIsAssistantThinking] = useState(false);
   const [pipelineRoute, setPipelineRoute] = useState<PipelineRoute>("general");
@@ -780,68 +773,6 @@ function HomePageClient() {
     [clearStageTicker],
   );
 
-  const handleDownloadPdf = async (elementId: string) => {
-    try {
-      const element = document.getElementById(elementId);
-      if (!element) return;
-      
-      const printWindow = window.open('', '_blank', `width=${Math.max(800, element.scrollWidth + 100)},height=${element.scrollHeight}`);
-      if (!printWindow) {
-        toast.error("Could not start printing (pop-up blocker enabled).");
-        return;
-      }
-
-      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-        .map(s => s.outerHTML)
-        .join('\n');
-
-      const html = `
-        <!DOCTYPE html>
-        <html>
-          <head>
-            <title>NIP Report - ${new Date().toLocaleDateString()}</title>
-            ${styles}
-            <style>
-              @page { size: auto; margin: 15mm; }
-              body { 
-                background: white !important; 
-                margin: 0; 
-                padding: 20px;
-                -webkit-print-color-adjust: exact !important; 
-                print-color-adjust: exact !important;
-                font-family: system-ui, sans-serif;
-              }
-              * { color: black !important; border-color: #ddd !important; }
-              .glass-subtle, .glass { 
-                 background: white !important; box-shadow: none !important; border: none !important;
-              }
-              .no-print { display: none !important; }
-            </style>
-          </head>
-          <body>
-            ${element.outerHTML}
-            <script>
-              window.onload = () => {
-                setTimeout(() => {
-                  window.print();
-                  window.close();
-                }, 500);
-              };
-            </script>
-          </body>
-        </html>
-      `;
-
-      printWindow.document.open();
-      printWindow.document.write(html);
-      printWindow.document.close();
-      
-    } catch (error) {
-      console.error('Error generating PDF', error);
-      toast.error("Hubo un error al generar el PDF");
-    }
-  };
-
   useEffect(() => {
     setIsClientMounted(true);
 
@@ -878,7 +809,7 @@ function HomePageClient() {
         );
 
         if (!response.ok) {
-          throw new Error("No se pudo recuperar historial");
+          throw new Error("Could not retrieve history");
         }
 
         const payload = (await response.json()) as {
@@ -979,7 +910,7 @@ function HomePageClient() {
       return (
         <Badge className="gap-2" variant="default">
           <WifiIcon className="size-3.5" />
-          Conectado
+          Connected
         </Badge>
       );
     }
@@ -988,7 +919,7 @@ function HomePageClient() {
       return (
         <Badge className="gap-2" variant="secondary">
           <SparklesIcon className="size-3.5 animate-pulse" />
-          Conectando
+          Connecting
         </Badge>
       );
     }
@@ -996,7 +927,7 @@ function HomePageClient() {
     return (
       <Badge className="gap-2" variant="destructive">
         <WifiOffIcon className="size-3.5" />
-        Desconectado
+        Disconnected
       </Badge>
     );
   }, [socketStatus]);
@@ -1055,14 +986,14 @@ function HomePageClient() {
 
   const activeStageLabel = useMemo(() => {
     if (activeStageIndex < 0 || pipelineCheckpoints.length === 0) {
-      return "En espera";
+      return "Idle";
     }
 
     const boundedIndex = Math.min(
       activeStageIndex,
       pipelineCheckpoints.length - 1,
     );
-    return pipelineCheckpoints[boundedIndex] ?? "En espera";
+    return pipelineCheckpoints[boundedIndex] ?? "Idle";
   }, [activeStageIndex, pipelineCheckpoints]);
 
   const stageTimeline = useMemo(
@@ -1073,7 +1004,7 @@ function HomePageClient() {
   const questionDisplayText = useMemo(() => {
     return (
       transparencySnapshot?.analysisQuestion ??
-      (lastSubmittedMessage || "Sin pregunta registrada")
+      (lastSubmittedMessage || "No question registered")
     );
   }, [lastSubmittedMessage, transparencySnapshot?.analysisQuestion]);
 
@@ -1085,8 +1016,8 @@ function HomePageClient() {
     }
 
     return pipelineRoute === "chat_pipeline"
-      ? "No aplica en ruta Chat"
-      : "Sin SQL disponible";
+      ? "Not applicable in Chat route"
+      : "No SQL available";
   }, [
     pipelineRoute,
     transparencySnapshot?.generatedSql,
@@ -1094,7 +1025,7 @@ function HomePageClient() {
   ]);
 
   const previewDisplayText = useMemo(() => {
-    return transparencySnapshot?.resultPreview ?? "Sin preview disponible";
+    return transparencySnapshot?.resultPreview ?? "No preview available";
   }, [transparencySnapshot?.resultPreview]);
 
   const resetStreamingState = useCallback(() => {
@@ -1198,7 +1129,7 @@ function HomePageClient() {
       const latencyLabel =
         typeof processingMs === "number" ? ` · ${processingMs}ms` : "";
       setAgentStatus(
-        `Flujo ${routeLabel} completado${latencyLabel}: ${checkpoints.join(" · ")}`,
+        `${routeLabel} flow completed${latencyLabel}: ${checkpoints.join(" · ")}`,
       );
       setIsSubmitting(false);
       setIsAssistantThinking(false);
@@ -1240,7 +1171,7 @@ function HomePageClient() {
       });
 
       if (!negotiateResponse.ok) {
-        throw new Error("No se pudo negociar la conexión realtime.");
+        throw new Error("Could not negotiate realtime connection.");
       }
 
       const payload =
@@ -1263,7 +1194,7 @@ function HomePageClient() {
           }),
         );
 
-        setAgentStatus("Conectando a grupo realtime...");
+        setAgentStatus("Connecting to realtime group...");
       };
 
       ws.onmessage = (event) => {
@@ -1290,7 +1221,7 @@ function HomePageClient() {
           const success = frame.success === true;
           if (success) {
             setSocketStatus("connected");
-            setAgentStatus("Conectado a Azure Web PubSub");
+            setAgentStatus("Connected to Azure Web PubSub");
             return;
           }
 
@@ -1305,7 +1236,7 @@ function HomePageClient() {
           const message =
             error && "message" in error && typeof error.message === "string"
               ? error.message
-              : "Sin detalle";
+              : "No details";
 
           setSocketStatus("disconnected");
           setAgentStatus(`${name}: ${message}`);
@@ -1422,7 +1353,7 @@ function HomePageClient() {
             analysisQuestion: serverEvent.analysisQuestion,
             validatedSql: serverEvent.validatedSql,
           });
-          setAgentStatus("Esperando aprobación humana para consulta sensible");
+          setAgentStatus("Waiting for human approval for sensitive query");
           setTransparencySnapshot((previous) => ({
             ...(previous ?? {}),
             analysisQuestion:
@@ -1454,8 +1385,8 @@ function HomePageClient() {
             setIsAssistantThinking(false);
             setAgentStatus(
               serverEvent.status === "expired"
-                ? "Aprobación expirada. Consulta cancelada por compliance."
-                : "Consulta sensible rechazada.",
+                ? "Approval expired. Query cancelled by compliance."
+                : "Sensitive query rejected.",
             );
           }
         }
@@ -1471,7 +1402,7 @@ function HomePageClient() {
         setIsAssistantThinking(false);
 
         const closeDetail = formatCloseDetail(event);
-        setAgentStatus(`Conexión cerrada (${closeDetail})`);
+        setAgentStatus(`Connection closed (${closeDetail})`);
 
         if (!allowReconnectRef.current) {
           return;
@@ -1480,7 +1411,7 @@ function HomePageClient() {
         reconnectTimerRef.current = window.setTimeout(() => {
           connectRealtime().catch(() => {
             setSocketStatus("disconnected");
-            setAgentStatus("No se pudo reconectar con Azure Web PubSub");
+            setAgentStatus("Could not reconnect with Azure Web PubSub");
           });
         }, SOCKET_RETRY_MS);
       };
@@ -1491,7 +1422,7 @@ function HomePageClient() {
         }
 
         setSocketStatus("disconnected");
-        setAgentStatus("Error de conexión WebSocket");
+        setAgentStatus("WebSocket connection error");
         setIsSubmitting(false);
         setIsAssistantThinking(false);
         resetStreamingState();
@@ -1528,23 +1459,21 @@ function HomePageClient() {
             sessionId,
             correlationId: pendingApproval.correlationId,
             approved,
-            reason: approved
-              ? "Aprobado por usuario"
-              : "Rechazado por usuario",
+            reason: approved ? "Aprobado por usuario" : "Rechazado por usuario",
           }),
         });
 
         if (!response.ok) {
-          throw new Error("No se pudo enviar la decisión de aprobación");
+          throw new Error("Could not send approval decision");
         }
 
         setAgentStatus(
           approved
-            ? "Aprobación enviada. Reanudando ejecución..."
-            : "Rechazo enviado. Cancelando ejecución...",
+            ? "Approval sent. Resuming execution..."
+            : "Rejection sent. Cancelling execution...",
         );
       } catch {
-        toast.error("No se pudo enviar la decisión de aprobación");
+        toast.error("Could not send approval decision");
       } finally {
         setIsApprovalSubmitting(false);
       }
@@ -1556,10 +1485,10 @@ function HomePageClient() {
     const timer = window.setTimeout(() => {
       connectRealtime().catch(() => {
         setSocketStatus("disconnected");
-        setAgentStatus("No se pudo conectar con Azure Web PubSub");
-        toast.error("Error de conexión realtime", {
+        setAgentStatus("Could not connect with Azure Web PubSub");
+        toast.error("Realtime connection error", {
           description:
-            "Verifica AZURE_WEBPUBSUB_CONNECTION_STRING, AZURE_WEBPUBSUB_HUB_NAME y AZURE_WEBPUBSUB_GROUP en el backend.",
+            "Verify AZURE_WEBPUBSUB_CONNECTION_STRING, AZURE_WEBPUBSUB_HUB_NAME and AZURE_WEBPUBSUB_GROUP on the backend.",
         });
       });
     }, 0);
@@ -1589,13 +1518,13 @@ function HomePageClient() {
       }
 
       if (!sessionId) {
-        toast.error("Sesión realtime no inicializada");
+        toast.error("Realtime session not initialized");
         return;
       }
 
       if (socketStatus !== "connected") {
-        toast.error("Sin conexión realtime", {
-          description: "Reconecta antes de enviar mensajes.",
+        toast.error("No realtime connection", {
+          description: "Reconnect before sending messages.",
         });
         return;
       }
@@ -1639,16 +1568,16 @@ function HomePageClient() {
           setIsSubmitting(false);
           setIsAssistantThinking(false);
           resetStreamingState();
-          toast.error("No se pudo procesar el mensaje", {
-            description: "El backend de agentes devolvió un error.",
+          toast.error("Could not process message", {
+            description: "Agent backend returned an error.",
           });
         }
       } catch {
         setIsSubmitting(false);
         setIsAssistantThinking(false);
         resetStreamingState();
-        toast.error("No se pudo enviar el mensaje", {
-          description: "Revisa la conexión con el backend realtime.",
+        toast.error("Could not send message", {
+          description: "Check connection with realtime backend.",
         });
       }
     },
@@ -1658,8 +1587,8 @@ function HomePageClient() {
   const handlePromptSubmit = useCallback(
     async (message: PromptInputMessage) => {
       if (message.files.length > 0) {
-        toast.error("Adjuntos no soportados", {
-          description: "Actualmente solo se admiten mensajes de texto.",
+        toast.error("Attachments not supported", {
+          description: "Currently only text messages are allowed.",
         });
         return;
       }
@@ -1672,8 +1601,8 @@ function HomePageClient() {
   const handleReconnect = useCallback(() => {
     connectRealtime().catch(() => {
       setSocketStatus("disconnected");
-      setAgentStatus("No se pudo reconectar con Azure Web PubSub");
-      toast.error("Reconexión fallida");
+      setAgentStatus("Could not reconnect with Azure Web PubSub");
+      toast.error("Reconnection failed");
     });
   }, [connectRealtime]);
 
@@ -1698,7 +1627,7 @@ function HomePageClient() {
     setPendingApproval(null);
     setIsApprovalSubmitting(false);
     resetStreamingState();
-    setAgentStatus("Reiniciando sesión...");
+    setAgentStatus("Resetting session...");
     setMessages([]);
 
     try {
@@ -1710,18 +1639,18 @@ function HomePageClient() {
       );
 
       if (!response.ok) {
-        throw new Error("No se pudo limpiar el historial");
+        throw new Error("Could not clear history");
       }
     } catch {
-      toast.error("No se pudo limpiar el historial anterior");
+      toast.error("Could not clear previous history");
     }
 
     const nextSessionId = nanoid(14);
     window.localStorage.setItem(SESSION_STORAGE_KEY, nextSessionId);
     loadedHistorySessionIdRef.current = null;
     setSessionId(nextSessionId);
-    setAgentStatus("Sesión reiniciada");
-    toast.success("Chat reiniciado");
+    setAgentStatus("Session reset");
+    toast.success("Chat reset");
   }, [clearStageTicker, resetStreamingState, sessionId]);
 
   const handleInputChange = useCallback(
@@ -1768,7 +1697,7 @@ function HomePageClient() {
                   className="gap-1.5 text-[10px] border-white/10 bg-white/6"
                 >
                   <SparklesIcon className="size-3 animate-pulse text-blue-400" />
-                  {isAssistantThinking ? "Pensando" : "Generando"}
+                  {isAssistantThinking ? "Thinking" : "Generating"}
                 </Badge>
               )}
               <Badge
@@ -1785,7 +1714,7 @@ function HomePageClient() {
                 disabled={socketStatus === "connecting"}
               >
                 <RefreshCwIcon className="size-3" />
-                Reconectar
+                Reconnect
               </Button>
               <Button
                 variant="outline"
@@ -1794,7 +1723,7 @@ function HomePageClient() {
                 onClick={handleResetChat}
                 disabled={isSubmitting}
               >
-                Nuevo chat
+                New chat
               </Button>
               <LogoutButton />
             </div>
@@ -1845,25 +1774,9 @@ function HomePageClient() {
                               {formatMessageTime(message.timestamp)}
                             </span>
                           </div>
-                          <MessageContent id={`message-${message.id}`} className="text-[14px] leading-6 text-foreground/90">
-                            <MessageResponse>{cleanMessageContent(message.content)}</MessageResponse>
+                          <MessageContent className="text-[14px] leading-6 text-foreground/90">
+                            <MessageResponse>{message.content}</MessageResponse>
                           </MessageContent>
-                          
-                          {cleanMessageContent(message.content).length > 200 && (
-                            /^#{1,4}\s/m.test(cleanMessageContent(message.content)) || /\|.*\|.*\|/m.test(cleanMessageContent(message.content))
-                          ) && (
-                            <div className="mt-3 flex justify-end border-t border-white/5 pt-2 no-print">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => handleDownloadPdf(`message-${message.id}`)}
-                                className="h-7 text-xs text-muted-foreground hover:text-foreground no-print"
-                              >
-                                <PrinterIcon className="mr-2 size-3" />
-                                Print PDF Report
-                              </Button>
-                            </div>
-                          )}
                         </div>
                       ) : (
                         <div className="ml-auto w-fit max-w-full space-y-1">
@@ -1898,12 +1811,12 @@ function HomePageClient() {
                             Agent
                           </p>
                           <span className="text-[10px] text-muted-foreground/60">
-                            Generando...
+                            Generating...
                           </span>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <SparklesIcon className="size-4 animate-pulse text-blue-400" />
-                          <span>Pensando la mejor respuesta</span>
+                          <span>Thinking the best response</span>
                           <div className="ml-1 flex items-center gap-1">
                             <span className="size-1.5 animate-pulse rounded-full bg-blue-400 [animation-delay:0ms]" />
                             <span className="size-1.5 animate-pulse rounded-full bg-purple-400 [animation-delay:200ms]" />
@@ -1965,8 +1878,8 @@ function HomePageClient() {
                       <SparklesIcon className="size-3.5 animate-pulse text-blue-400" />
                       <span>
                         {isAssistantThinking
-                          ? "El agente está pensando la mejor estrategia..."
-                          : "El agente está generando la respuesta..."}
+                          ? "The agent is thinking the best strategy..."
+                          : "The agent is generating the response..."}
                       </span>
                     </div>
                     <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -1988,9 +1901,9 @@ function HomePageClient() {
                   maxFiles={0}
                   onError={({ code }) => {
                     if (code === "max_files") {
-                      toast.error("Adjuntos no soportados", {
+                      toast.error("Attachments not supported", {
                         description:
-                          "Actualmente solo se admiten mensajes de texto.",
+                          "Currently only text messages are allowed.",
                       });
                     }
                   }}
@@ -2000,8 +1913,8 @@ function HomePageClient() {
                     <PromptInputTextarea
                       onChange={handleInputChange}
                       value={input}
-                      placeholder="Describe tu solicitud: seguridad, performance, arquitectura o UX..."
-                      className="min-h-20"
+                      placeholder="Describe your request: security, performance, architecture or UX..."
+                      className="min-h-20 opacity-100 disabled:opacity-25 disabled:cursor-not-allowed"
                     />
                   </PromptInputBody>
 
@@ -2017,7 +1930,7 @@ function HomePageClient() {
 
                     <div className="flex items-center gap-3">
                       <p className="hidden text-xs text-muted-foreground md:block">
-                        Enter para enviar · Shift+Enter para nueva línea
+                        Enter to send · Shift+Enter for new line
                       </p>
                       <PromptInputSubmit
                         disabled={!input.trim() || isSubmitting}
@@ -2043,9 +1956,9 @@ function HomePageClient() {
             />
 
             {pendingApproval && (
-              <Card className="space-y-3 border-amber-500/40 bg-amber-500/5 p-3">
+              <Card className="space-y-3 border-orange-500/50 bg-orange-500/20 p-3">
                 <div className="space-y-1">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-amber-300">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-orange-600">
                     Human Approval Required
                   </p>
                   <p className="text-sm text-foreground/90">
@@ -2055,18 +1968,21 @@ function HomePageClient() {
 
                 <div className="space-y-1 text-xs text-muted-foreground">
                   {pendingApproval.riskLevel && (
-                    <p>Riesgo: {pendingApproval.riskLevel}</p>
+                    <p>Risk: {pendingApproval.riskLevel}</p>
                   )}
                   {pendingApproval.categories.length > 0 && (
-                    <p>Categorías: {pendingApproval.categories.join(", ")}</p>
+                    <p>Categories: {pendingApproval.categories.join(", ")}</p>
                   )}
-                  {pendingApproval.reason && <p>Motivo: {pendingApproval.reason}</p>}
+                  {pendingApproval.reason && (
+                    <p>Reason: {pendingApproval.reason}</p>
+                  )}
                   <p>Timeout: {pendingApproval.timeoutSeconds}s</p>
                 </div>
 
                 <div className="max-h-32 overflow-auto rounded-md border border-border/60 bg-background/70 p-2">
                   <p className="font-mono text-[11px] whitespace-pre-wrap text-foreground/80">
-                    {pendingApproval.validatedSql ?? "Sin SQL validado disponible"}
+                    {pendingApproval.validatedSql ??
+                      "No validated SQL available"}
                   </p>
                 </div>
 
@@ -2079,7 +1995,7 @@ function HomePageClient() {
                     }}
                     disabled={isApprovalSubmitting}
                   >
-                    Rechazar
+                    Reject
                   </Button>
                   <Button
                     size="sm"
@@ -2088,7 +2004,7 @@ function HomePageClient() {
                     }}
                     disabled={isApprovalSubmitting}
                   >
-                    Aprobar
+                    Approve
                   </Button>
                 </div>
               </Card>

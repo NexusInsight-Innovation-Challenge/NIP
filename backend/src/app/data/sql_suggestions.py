@@ -13,10 +13,10 @@ async def build_suggestions_from_catalog(
     
     if not catalog:
         return [
-            "Dame un reporte ejecutivo con los KPIs más relevantes de la base de datos",
-            "Top 10 productos por ventas y participación porcentual",
-            "Tendencia mensual de ventas con alertas de caída",
-            "Clientes con mayor contribución y concentración de riesgo",
+            "Give me an executive report with the most relevant KPIs from the database",
+            "Top 10 products by sales and percentage share",
+            "Monthly sales trend with drop alerts",
+            "Customers with highest contribution and risk concentration",
         ][:limit]
 
     # Use LLM to generate suggestions based on the actual catalog
@@ -24,15 +24,15 @@ async def build_suggestions_from_catalog(
         try:
             table_list = ", ".join(catalog[:100])
             prompt = (
-                "Eres un Analista de Datos Experto. "
-                "Basado en las siguientes tablas de una base de datos SQL Server, "
-                f"genera {limit} sugerencias de preguntas analíticas de alto nivel, de negocio o enfocadas a insights "
-                "que un ejecutivo le preguntaría a la base de datos. Sé creativo e interesante.\n\n"
-                f"Tablas: {table_list}\n\n"
-                "Reglas:\n"
-                "1. Escribe en español.\n"
-                "2. Retorna SOLAMENTE un arreglo JSON en texto plano con las preguntas (Strings), sin explicaciones adicionales ni backticks.\n"
-                'Ejemplo: ["Pregunta 1", "Pregunta 2"]'
+                "You are an Expert Data Analyst. "
+                "Based on the following tables from a SQL Server database, "
+                f"generate {limit} high-level, business-focused analytical question suggestions "
+                "that an executive would ask the database. Be creative and insightful.\n\n"
+                f"Tables: {table_list}\n\n"
+                "Rules:\n"
+                "1. Write in English.\n"
+                "2. Return ONLY a plain text JSON array with the questions (Strings), no extra explanations or backticks.\n"
+                'Example: ["Question 1", "Question 2"]'
             )
             
             response = await ms_agent_client.generate(prompt)
@@ -59,27 +59,27 @@ async def build_suggestions_from_catalog(
     suggestions: list[str] = []
 
     if has_sales and has_date:
-        suggestions.append("Dame ventas por trimestre para 2025 con comparación vs 2024")
-        suggestions.append("Resume tendencia mensual de ventas y detecta meses atípicos")
+        suggestions.append("Give me quarterly sales for 2025 with comparison vs 2024")
+        suggestions.append("Summarize monthly sales trend and detect outliers")
 
     if has_sales and has_product:
-        suggestions.append("Top 10 productos por ventas y participación porcentual")
+        suggestions.append("Top 10 products by sales and percentage share")
 
     if has_sales and has_customer:
-        suggestions.append("Top clientes por ventas y riesgo de concentración")
+        suggestions.append("Top customers by sales and concentration risk")
 
     if has_orders and has_customer:
-        suggestions.append("Analiza ticket promedio y frecuencia por segmento de cliente")
+        suggestions.append("Analyze average ticket and frequency by customer segment")
 
     if has_sales and has_store:
-        suggestions.append("Ranking de tiendas por ventas y brecha entre top/bottom")
+        suggestions.append("Ranking of stores by sales and gap between top/bottom")
 
     if not suggestions:
         suggestions.extend(
             [
-                "Dame un reporte ejecutivo con los KPIs más relevantes de la base de datos",
-                "¿Qué dimensiones y métricas recomendarías para un dashboard de dirección?",
-                "Resume hallazgos clave y próximos análisis recomendados",
+                "Give me an executive report with the most relevant KPIs from the database",
+                "Which dimensions and metrics would you recommend for a management dashboard?",
+                "Summarize key findings and recommended next analysis",
             ]
         )
 

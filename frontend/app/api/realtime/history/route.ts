@@ -48,12 +48,9 @@ export async function GET(request: Request) {
     : Math.min(Math.max(limitParam, 1), 500);
 
   try {
-    console.log(`[HISTORY-GET] Obteniendo historial para sessionId: ${parsedSessionId.data}, limit: ${limit}`);
     const messages = await getMessages(parsedSessionId.data, limit);
-    console.log(`[HISTORY-GET] ${messages.length} mensajes obtenidos exitosamente.`);
     return NextResponse.json({ messages }, { status: 200 });
   } catch (error) {
-    console.error("[HISTORY-GET ERROR] Falla al obtener mensajes:", error);
     const detail = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
       {
@@ -79,15 +76,11 @@ export async function POST(request: Request) {
 
     const userId =
       payload.userId ?? `web-user-${payload.sessionId.slice(0, 12)}`;
-        
-      console.log(`[HISTORY-POST] Guardando mensaje de ${message.role} para sessionId: ${payload.sessionId}`);
-      await upsertSession(payload.sessionId, userId);
-      await appendMessage(payload.sessionId, message);
-      
-      console.log(`[HISTORY-POST] Mensaje persistido exitosamente en Redis`);
-      return NextResponse.json({ ok: true }, { status: 201 });
-    } catch (error) {
-      console.error("[HISTORY-POST ERROR] Fallo al guardar en base de datos:", error);
+    await upsertSession(payload.sessionId, userId);
+    await appendMessage(payload.sessionId, message);
+
+    return NextResponse.json({ ok: true }, { status: 201 });
+  } catch (error) {
     const detail = error instanceof Error ? error.message : "Invalid request";
     return NextResponse.json(
       {

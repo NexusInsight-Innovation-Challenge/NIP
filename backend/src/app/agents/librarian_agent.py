@@ -26,7 +26,7 @@ class LibrarianAgent(AgentStep):
             return context
 
         if not self._sql_tool.enabled:
-            context.schema_context = "Azure SQL no está configurado."
+            context.schema_context = "Azure SQL is not configured."
             context.schema_tables = []
             context.metadata["schema_source"] = "disabled"
             return context
@@ -73,7 +73,7 @@ class LibrarianAgent(AgentStep):
                     self._cached_rich_schema = context.schema_context
                 except Exception as fallback_error:
                     logger.exception("Schema context fallback also failed: %s", fallback_error)
-                    context.schema_context = "No se pudo obtener metadata del esquema."
+                    context.schema_context = "Could not retrieve schema metadata."
 
         # Get FK relationships
         try:

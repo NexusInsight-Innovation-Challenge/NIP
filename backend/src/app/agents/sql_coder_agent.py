@@ -26,7 +26,7 @@ class SQLCoderAgent(AgentStep):
 
         if not self._ms_agent_client.enabled:
             raise RuntimeError(
-                "Microsoft Agent Framework no está configurado para generar SQL."
+                "Microsoft Agent Framework is not configured to generate SQL."
             )
 
         # Build the schema + FK context once

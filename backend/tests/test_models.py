@@ -16,3 +16,9 @@ def test_message_envelope_defaults() -> None:
     assert envelope.id
     assert envelope.correlation_id
     assert envelope.conversation_id
+
+
+def test_approval_event_types_available() -> None:
+    assert EventType.APPROVAL_REQUIRED.value == "approval.required"
+    assert EventType.APPROVAL_RESPONSE.value == "approval.response"
+    assert EventType.APPROVAL_FINALIZED.value == "approval.finalized"

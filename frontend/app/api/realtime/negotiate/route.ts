@@ -17,12 +17,10 @@ const bodySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  console.log("[NEGOTIATE] Inicia petición de negotiate");
   try {
     // 1. Verificamos la sesión a nivel de servidor
     const session = await getServerSession(authOptions);
     if (!session) {
-      console.warn("[NEGOTIATE] No hay sesión de servidor, retornando 401");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -32,23 +30,16 @@ export async function POST(request: Request) {
     const validatedUserEmail = session?.user?.email ?? "unknown-user";
     const userId = payload.userId ?? validatedUserEmail;
 
-    console.log(`[NEGOTIATE] Procesando sessionId: ${payload.sessionId}, userId: ${userId}`);
-
-    console.log("[NEGOTIATE] Insertando sesión en Redis...");
     await upsertSession(payload.sessionId, userId);
-    
-    console.log("[NEGOTIATE] Solicitando token a Azure Web PubSub...");
     const token = await negotiateRealtimeConnection(userId);
 
-    console.log("[NEGOTIATE] Token obtenido exitosamente");
     return NextResponse.json(token, { status: 200 });
   } catch (error) {
-    console.error("[NEGOTIATE ERROR]", error);
     const message = error instanceof Error ? error.message : "Invalid request";
 
     return NextResponse.json(
       {
-        error: "No se pudo negociar conexión realtime.",
+        error: "Could not negotiate realtime connection.",
         detail: process.env.NODE_ENV === "development" ? message : undefined,
       },
       { status: 400 },

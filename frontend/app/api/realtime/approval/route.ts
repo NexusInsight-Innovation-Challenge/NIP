@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error: "No se pudo registrar la decisión de aprobación.",
+        error: "Could not register approval decision.",
         detail: process.env.NODE_ENV === "development" ? message : undefined,
       },
       { status: 400 },

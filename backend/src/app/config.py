@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(extra="ignore")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     azure_webpubsub_connection_string: str = Field(
         ...,
@@ -41,6 +41,33 @@ class Settings(BaseSettings):
         alias="SQL_MAX_RETRY_CORRECTIONS",
         ge=0,
         le=5,
+    )
+
+    hitl_sensitive_approval_enabled: bool = Field(
+        True,
+        alias="HITL_SENSITIVE_APPROVAL_ENABLED",
+    )
+    hitl_approval_timeout_seconds: int = Field(
+        180,
+        alias="HITL_APPROVAL_TIMEOUT_SECONDS",
+        ge=15,
+        le=3600,
+    )
+    hitl_llm_review_enabled: bool = Field(
+        False,
+        alias="HITL_LLM_REVIEW_ENABLED",
+    )
+    hitl_llm_review_timeout_seconds: int = Field(
+        2,
+        alias="HITL_LLM_REVIEW_TIMEOUT_SECONDS",
+        ge=1,
+        le=15,
+    )
+    hitl_policy_version: str = Field(
+        "v1",
+        alias="HITL_POLICY_VERSION",
+        min_length=2,
+        max_length=40,
     )
 
 

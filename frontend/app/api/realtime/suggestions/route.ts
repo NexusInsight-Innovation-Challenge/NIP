@@ -4,10 +4,10 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const DEFAULT_SUGGESTIONS = [
-  "Dame un reporte ejecutivo con KPIs clave de la base de datos",
-  "Top 10 productos por ventas y participación",
-  "Tendencia mensual de ventas con alertas de caída",
-  "Clientes con mayor contribución y concentración de riesgo",
+  "Give me an executive report with key KPIs from the database",
+  "Top 10 products by sales and market share",
+  "Monthly sales trend with decline alerts",
+  "Customers with highest contribution and risk concentration",
 ];
 
 const parseLimit = (raw: string | null): number => {

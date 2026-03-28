@@ -29,7 +29,7 @@ function LoginContent() {
           </h1>
           
           <p className="text-lg text-[#605E5C] mb-8 leading-relaxed">
-            Analytical AI with Measured Results. Inicia sesión para acceder a inteligencia ejecutiva.
+            Analytical AI with Measured Results. Sign in to access executive intelligence.
           </p>
           
           <Button 
@@ -37,7 +37,7 @@ function LoginContent() {
             size="lg"
             onClick={() => signIn("azure-ad", { callbackUrl })}
           >
-            Iniciar sesión con Entra ID
+            Sign in with Entra ID
           </Button>
         </div>
       </div>
@@ -49,7 +49,7 @@ export default function LoginPage() {
   return (
     <Suspense fallback={
       <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa]">
-        <p className="text-[#605E5C]">Cargando...</p>
+        <p className="text-[#605E5C]">Loading...</p>
       </div>
     }>
       <LoginContent />

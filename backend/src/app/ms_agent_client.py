@@ -92,7 +92,7 @@ class MicrosoftAgentFrameworkClient:
             name="RealtimeResponseAgent",
             instructions=(
                 "You are a concise enterprise assistant. "
-                "Answer in Spanish with practical next steps."
+                "Answer in English with practical next steps."
             ),
         )
 

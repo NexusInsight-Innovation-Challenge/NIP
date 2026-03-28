@@ -13,6 +13,9 @@ class EventType(str, Enum):
     STATUS = "status"
     ASSISTANT_DELTA = "assistant.delta"
     ASSISTANT_COMPLETE = "assistant.complete"
+    APPROVAL_REQUIRED = "approval.required"
+    APPROVAL_RESPONSE = "approval.response"
+    APPROVAL_FINALIZED = "approval.finalized"
     ERROR = "error"
 
 

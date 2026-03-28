@@ -28,20 +28,20 @@ class EvaluatorAgent(AgentStep):
 
     async def _handle_chat(self, context: AgentContext) -> AgentContext:
         if not self._ms_agent_client.enabled:
-            context.response = "No hay proveedor de respuesta configurado."
+            context.response = "No response provider configured."
             return context
 
         prompt = (
-            "Eres un experto analista de datos empresariales. El usuario te está hablando en un chat.\n"
-            "Responde en español de forma cálida y profesional.\n"
-            "Si el usuario saluda, preséntate brevemente como un analista de datos experto que puede:\n"
-            "- Generar reportes ejecutivos con KPIs reales desde la base de datos\n"
-            "- Analizar tendencias de ventas, productos, clientes\n"
-            "- Crear análisis comparativos y detectar anomalías\n"
-            "- Responder preguntas complejas con JOINs y análisis multidimensional\n\n"
-            "Sugiere 2-3 preguntas analíticas interesantes que podrían hacer.\n"
-            "NUNCA des pasos genéricos — siempre ofrece actuar directamente sobre los datos.\n\n"
-            f"Mensaje del usuario: {context.user_message}\n"
+            "You are an expert business data analyst. The user is talking to you in a chat.\n"
+            "You MUST respond ENTIRELY in English. Do not use Spanish or any other language, even if the user or the query results contain it.\n"
+            "If the user greets you, briefly introduce yourself as an expert data analyst who can:\n"
+            "- Generate executive reports with real KPIs from the database\n"
+            "- Analyze sales, product, and customer trends\n"
+            "- Create comparative analysis and detect anomalies\n"
+            "- Answer complex questions with JOINs and multi-dimensional analysis\n\n"
+            "Suggest 2-3 interesting analytical questions they could ask.\n"
+            "NEVER give generic steps — always offer to act directly on the data.\n\n"
+            f"User message: {context.user_message}\n"
         )
         context.response = await self._ms_agent_client.generate(prompt)
         context.metadata["response_provider"] = "microsoft_agent_framework"
@@ -64,29 +64,29 @@ class EvaluatorAgent(AgentStep):
         if context.sub_queries:
             summaries = []
             for sq in context.sub_queries:
-                status = f"✅ {sq.row_count} filas" if sq.row_count > 0 else f"❌ {sq.error or 'sin datos'}"
+                status = f"✅ {sq.row_count} rows" if sq.row_count > 0 else f"❌ {sq.error or 'no data'}"
                 summaries.append(f"- [{sq.id}] {sq.purpose}: {sq.question} → {status}")
             sub_query_summary = "\n".join(summaries)
 
         prompt = (
             "You are a SENIOR MANAGEMENT CONSULTANT at McKinsey & Company presenting to a C-level executive.\n"
             "Your job is to transform raw SQL query results into a WORLD-CLASS executive analytical report.\n\n"
-            "=== OUTPUT FORMAT (Respond in Spanish, use Markdown) ===\n\n"
-            "## 📊 Resumen Ejecutivo\n"
+            "=== OUTPUT FORMAT (Respond ENTIRELY in English, use Markdown) ===\n\n"
+            "## 📊 Executive Summary\n"
             "2-3 sentences capturing THE most important insight from the data. Lead with the biggest number or trend.\n\n"
-            "## 📈 Métricas Clave\n"
+            "## 📈 Key Metrics\n"
             "Present key metrics as a clear comparison. Use formatted numbers (e.g., $1,234,567). "
             "If the data has rankings, present as a numbered list with metrics. "
             "If there's time-series data, highlight trends with ↑ ↗ → ↘ ↓ arrows.\n\n"
-            "## 🔍 Análisis Profundo\n"
+            "## 🔍 Deep Analysis\n"
             "3-5 bullet points with SPECIFIC insights derived from the data:\n"
             "- Patterns, anomalies, concentrations, outliers\n"
             "- Percentage contributions and Pareto analysis\n"
             "- Growth/decline trends with specific numbers\n"
             "- Cross-dimensional correlations (if multiple data sets)\n\n"
-            "## 💡 Recomendaciones Estratégicas\n"
+            "## 💡 Strategic Recommendations\n"
             "3 actionable, data-driven recommendations. Each should reference specific numbers from the analysis.\n\n"
-            "## 🔗 Trazabilidad de Datos\n"
+            "## 🔗 Data Traceability\n"
             "Brief note on which tables and queries produced these insights (for transparency).\n\n"
             "=== RULES ===\n"
             "1. ALWAYS reference specific numbers from the data — never be vague.\n"
@@ -95,7 +95,8 @@ class EvaluatorAgent(AgentStep):
             "4. If data is empty or minimal, acknowledge it and suggest better queries.\n"
             "5. Use emojis sparingly for section headers only.\n"
             "6. Keep it under 800 words but rich in substance.\n"
-            "7. Be bold in your insights — identify the 'so what?' for the business.\n\n"
+            "7. Be bold in your insights — identify the 'so what?' for the business.\n"
+            "8. You MUST write your ENTIRE report in English. No exceptions.\n\n"
             f"=== ORIGINAL QUESTION ===\n{context.analysis_question or context.user_message}\n\n"
         )
 
@@ -171,9 +172,9 @@ class EvaluatorAgent(AgentStep):
     def _build_fallback_response(self, context: AgentContext, data_context: str) -> str:
         total = sum(sq.row_count for sq in context.sub_queries) if context.sub_queries else len(context.query_result_rows)
         return (
-            f"Consultas ejecutadas correctamente. "
-            f"Total de filas: {total}.\n\n"
-            f"Datos:\n{data_context[:2000]}"
+            f"Queries executed successfully. "
+            f"Total rows: {total}.\n\n"
+            f"Data:\n{data_context[:2000]}"
         )
 
     def _set_result_preview(self, context: AgentContext) -> None:

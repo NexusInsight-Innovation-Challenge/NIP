@@ -62,16 +62,16 @@ class PlannerAgent(AgentStep):
             "4. For simple questions (single metric, one table lookup), use a single sub-query.\n"
             "5. If the user references a previous conversation turn (e.g. 'tell me more', 'the first one', "
             "'do it'), look at the conversation history and create a concrete analytical sub-query.\n"
-            "6. ALWAYS write sub-query questions in a way that a SQL expert could directly translate them.\n\n"
+            "6. ALWAYS translate the user's question and write all sub-query questions in English.\n\n"
             f"{history_block}\n\n"
             f"USER MESSAGE: \"{message}\"\n\n"
             "Respond with ONLY valid JSON (no markdown, no backticks):\n"
             "{\n"
             '  "intent": "analytics" or "chat",\n'
             '  "execution_plan": "Brief reasoning about your routing decision (1-2 sentences)",\n'
-            '  "refined_question": "The user\'s question rewritten as a clear analytical request",\n'
+            '  "refined_question": "The user\'s question rewritten as a clear analytical request in English",\n'
             '  "sub_queries": [\n'
-            '    {"id": "sq1", "question": "Specific analytical question", "purpose": "category like revenue_kpis, top_products, trend_analysis, customer_analysis, etc."}\n'
+            '    {"id": "sq1", "question": "Specific analytical question in English", "purpose": "category like revenue_kpis, top_products, trend_analysis, customer_analysis, etc."}\n'
             "  ]\n"
             "}\n\n"
             "For chat intent, sub_queries should be an empty array.\n"
@@ -113,7 +113,7 @@ class PlannerAgent(AgentStep):
         _chat_only_markers = (
             "hola", "hello", "hi", "hey", "buenos días", "buenas tardes",
             "buenas noches", "gracias", "thank", "adiós", "bye",
-            "cómo estás", "cuéntame sobre ti",
+            "cómo estás", "cuéntame sobre ti", "how are you", "tell me about yourself",
         )
         lowered = message.lower()
         is_chat = any(lowered.strip() == marker for marker in _chat_only_markers)

@@ -5,11 +5,11 @@ export default function LogoutPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-background">
       <div className="text-center space-y-4">
-        <h1 className="text-2xl font-bold">Sesión cerrada correctamente</h1>
-        <p className="text-muted-foreground">Has cerrado sesión con éxito.</p>
+        <h1 className="text-2xl font-bold">Successfully logged out</h1>
+        <p className="text-muted-foreground">You have effectively ended your session.</p>
         <Button asChild>
           <Link href="/">
-            Iniciar sesión nuevamente
+            Sign in again
           </Link>
         </Button>
       </div>

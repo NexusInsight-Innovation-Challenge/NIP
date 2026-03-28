@@ -73,6 +73,18 @@ class AgentContext:
     enriched_message: str | None = None
     response: str | None = None
 
+    # Human-in-the-loop approval state
+    approval_required: bool = False
+    approval_status: str = "not_required"
+    approval_reason: str | None = None
+    approval_categories: list[str] = field(default_factory=list)
+    approval_risk_level: str = "low"
+    approval_requested_at: str | None = None
+    approval_decided_at: str | None = None
+    approval_decided_by: str | None = None
+    approval_decision_reason: str | None = None
+    approval_timeout_seconds: int | None = None
+
     # Conversation memory
     conversation_history: list[ConversationTurn] = field(default_factory=list)
 

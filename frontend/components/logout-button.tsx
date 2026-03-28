@@ -12,7 +12,7 @@ export function LogoutButton() {
       onClick={() => signOut({ callbackUrl: "http://localhost:3000/logout" })}
     >
       <LogOut className="size-4 mr-2" /> 
-      Salir
+      Logout
     </Button>
   );
 }

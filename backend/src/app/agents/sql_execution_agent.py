@@ -34,13 +34,20 @@ class SQLExecutionAgent(AgentStep):
     )
     _question_table_hints = {
         "ventas": ["sale", "sales", "order", "orders"],
+        "sales": ["sale", "sales", "order", "orders"],
         "ingresos": ["sale", "sales", "revenue"],
+        "revenue": ["sale", "sales", "revenue"],
         "clientes": ["customer", "client"],
+        "customers": ["customer", "client"],
         "pedidos": ["order", "orders", "purchase"],
+        "orders": ["order", "orders", "purchase"],
         "productos": ["product", "item"],
+        "products": ["product", "item"],
         "compras": ["purchase", "order", "orders"],
+        "purchases": ["purchase", "order", "orders"],
         "factura": ["invoice", "billing"],
         "facturación": ["invoice", "billing"],
+        "invoice": ["invoice", "billing"],
     }
 
     def __init__(

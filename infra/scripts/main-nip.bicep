@@ -255,7 +255,7 @@ resource appServiceWAPlan 'Microsoft.Web/serverfarms@2023-01-01' = {
 }
 
 var webAppChatName = '${prefix}-app-chat-${uniqueString(resourceGroup().id)}'
-var webAppChatImage = '${acr.properties.loginServer}/chat-app:${containerImageTag}'
+var webAppChatImage = '${acr.properties.loginServer}/innovation-chat:${containerImageTag}'
 resource webAppChat 'Microsoft.Web/sites@2023-01-01' = {
   name: webAppChatName
   location: location
@@ -394,8 +394,8 @@ resource webAppChat 'Microsoft.Web/sites@2023-01-01' = {
   }
 }
 
-var webAppNeiName = '${prefix}-app-nei-${uniqueString(resourceGroup().id)}'
-var webAppNeiImage = '${acr.properties.loginServer}/nei-app:${containerImageTag}'
+var webAppNeiName = '${prefix}-app-agent-${uniqueString(resourceGroup().id)}'
+var webAppNeiImage = '${acr.properties.loginServer}/innovation-agent:${containerImageTag}'
 resource webAppNei 'Microsoft.Web/sites@2023-01-01' = {
   name: webAppNeiName
   location: location
@@ -619,6 +619,17 @@ resource roleAcr 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   dependsOn: [
     roleStorage
   ]
+}
+
+
+resource acrPushRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(acr.id, userIdentity.id, 'AcrPush')
+  scope: acr
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '8311e02d-d67e-4dfe-8e18-b1567e1dc3b9') // AcrPush role
+    principalId: userIdentity.properties.principalId
+    principalType: 'ServicePrincipal'
+  }
 }
 
 resource roleSqlAdmins 'Microsoft.Authorization/roleAssignments@2022-04-01' = {

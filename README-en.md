@@ -37,3 +37,9 @@ An Azure-native solution (AI Foundry, Container Apps, SQL, Key Vault) deployed v
 ### 🏢 Architecture  
 
 <img src="docs/Architecture.png" width="100%" height="100%">   
+
+### Additional Resources
+
+- [Nexus Insight - Live Demo](https://nip-app-chat-zngovxusmkn3y.azurewebsites.net/)
+- [Nexus Insight - Slides](https://emilio17mc.github.io/nexus-insight-planning/)
+- [Alternative Link for Video](https://drive.google.com/file/d/1feI2RUFpmW7T0pD-Jj0l9zjnn_deZ7oS/view)

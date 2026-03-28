@@ -1,3 +1,4 @@
+[English version](./README-en.md)
 # Innovation Challenge Chat | Azure Web PubSub + Next.js
 
 Interfaz visual de chat en tiempo real con pipeline de agentes y backend en Next.js App Router.

@@ -1,3 +1,4 @@
+[English version](./README-en.md)
 # Innovation Challenge Chat | Azure Web PubSub + Microsoft Agent Framework
 
 Demo **plug-and-play** en Python para procesamiento de mensajes en tiempo real usando:

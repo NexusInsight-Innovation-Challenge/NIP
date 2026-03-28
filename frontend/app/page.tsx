@@ -44,6 +44,7 @@ import {
   WifiIcon,
   WifiOffIcon,
   ZapIcon,
+  PrinterIcon,
 } from "lucide-react";
 import {
   RealtimeNegotiateResponse,
@@ -705,6 +706,13 @@ const parseStageTiming = (
     .filter((entry) => Number.isFinite(entry.ms));
 };
 
+const cleanMessageContent = (content: string) => {
+  if (!content) return content;
+  const trimmed = content.trim();
+  const match = trimmed.match(/^```[a-z]*\s+([\s\S]*?)```$/i);
+  return match ? match[1].trim() : content;
+};
+
 function HomePageClient() {
   const { data: session } = useSession();
   const [isClientMounted, setIsClientMounted] = useState(false);
@@ -771,6 +779,68 @@ function HomePageClient() {
     },
     [clearStageTicker],
   );
+
+  const handleDownloadPdf = async (elementId: string) => {
+    try {
+      const element = document.getElementById(elementId);
+      if (!element) return;
+      
+      const printWindow = window.open('', '_blank', `width=${Math.max(800, element.scrollWidth + 100)},height=${element.scrollHeight}`);
+      if (!printWindow) {
+        toast.error("Could not start printing (pop-up blocker enabled).");
+        return;
+      }
+
+      const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+        .map(s => s.outerHTML)
+        .join('\n');
+
+      const html = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>NIP Report - ${new Date().toLocaleDateString()}</title>
+            ${styles}
+            <style>
+              @page { size: auto; margin: 15mm; }
+              body { 
+                background: white !important; 
+                margin: 0; 
+                padding: 20px;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+                font-family: system-ui, sans-serif;
+              }
+              * { color: black !important; border-color: #ddd !important; }
+              .glass-subtle, .glass { 
+                 background: white !important; box-shadow: none !important; border: none !important;
+              }
+              .no-print { display: none !important; }
+            </style>
+          </head>
+          <body>
+            ${element.outerHTML}
+            <script>
+              window.onload = () => {
+                setTimeout(() => {
+                  window.print();
+                  window.close();
+                }, 500);
+              };
+            </script>
+          </body>
+        </html>
+      `;
+
+      printWindow.document.open();
+      printWindow.document.write(html);
+      printWindow.document.close();
+      
+    } catch (error) {
+      console.error('Error generating PDF', error);
+      toast.error("Hubo un error al generar el PDF");
+    }
+  };
 
   useEffect(() => {
     setIsClientMounted(true);
@@ -1775,9 +1845,25 @@ function HomePageClient() {
                               {formatMessageTime(message.timestamp)}
                             </span>
                           </div>
-                          <MessageContent className="text-[14px] leading-6 text-foreground/90">
-                            <MessageResponse>{message.content}</MessageResponse>
+                          <MessageContent id={`message-${message.id}`} className="text-[14px] leading-6 text-foreground/90">
+                            <MessageResponse>{cleanMessageContent(message.content)}</MessageResponse>
                           </MessageContent>
+                          
+                          {cleanMessageContent(message.content).length > 200 && (
+                            /^#{1,4}\s/m.test(cleanMessageContent(message.content)) || /\|.*\|.*\|/m.test(cleanMessageContent(message.content))
+                          ) && (
+                            <div className="mt-3 flex justify-end border-t border-white/5 pt-2 no-print">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleDownloadPdf(`message-${message.id}`)}
+                                className="h-7 text-xs text-muted-foreground hover:text-foreground no-print"
+                              >
+                                <PrinterIcon className="mr-2 size-3" />
+                                Print PDF Report
+                              </Button>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         <div className="ml-auto w-fit max-w-full space-y-1">

@@ -1,0 +1,133 @@
+name: Deploy to Azure
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/deploy.yml'
+
+env:
+  ACR_NAME: ${{ secrets.ACR_NAME }}
+  RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dorny/paths-filter@v2
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'frontend/**'
+            backend:
+              - 'backend/**'
+
+  deploy-backend:
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Get commit hash
+        id: vars
+        run: echo "GITHUB_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: ACR Login
+        run: |
+          TOKEN=$(az acr login --name ${{ env.ACR_NAME }} --expose-token --output tsv --query accessToken)
+          echo $TOKEN | docker login ${{ env.ACR_NAME }}.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password-stdin
+
+      - name: Build and Push Backend Image
+        working-directory: ./backend
+        run: |
+          docker build \
+            -t ${{ env.ACR_NAME }}.azurecr.io/innovation-agent:${{ steps.vars.outputs.GITHUB_HASH }} \
+            -t ${{ env.ACR_NAME }}.azurecr.io/innovation-agent:latest \
+            .
+          
+          docker push ${{ env.ACR_NAME }}.azurecr.io/innovation-agent:${{ steps.vars.outputs.GITHUB_HASH }}
+          docker push ${{ env.ACR_NAME }}.azurecr.io/innovation-agent:latest
+
+      - name: Restart Backend Web App
+        run: |
+          az webapp restart \
+            --name ${{ secrets.BACKEND_WEB_APP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }}
+
+      - name: Deployment Summary
+        run: |
+          echo "### ✅ Backend Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.ACR_NAME }}.azurecr.io/innovation-agent:${{ steps.vars.outputs.GITHUB_HASH }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Web App:** \`${{ secrets.BACKEND_WEB_APP_NAME }}\`" >> $GITHUB_STEP_SUMMARY
+
+  deploy-frontend:
+    needs: [detect-changes, deploy-backend]
+    if: |
+      always() && 
+      needs.detect-changes.outputs.frontend == 'true' &&
+      (needs.deploy-backend.result == 'success' || needs.deploy-backend.result == 'skipped')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Get commit hash
+        id: vars
+        run: echo "GITHUB_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: ACR Login
+        run: |
+          TOKEN=$(az acr login --name ${{ env.ACR_NAME }} --expose-token --output tsv --query accessToken)
+          echo $TOKEN | docker login ${{ env.ACR_NAME }}.azurecr.io --username 00000000-0000-0000-0000-000000000000 --password-stdin
+
+      - name: Build and Push Frontend Image
+        working-directory: ./frontend
+        run: |
+          docker build --target runner \
+            -t ${{ env.ACR_NAME }}.azurecr.io/innovation-chat:${{ steps.vars.outputs.GITHUB_HASH }} \
+            -t ${{ env.ACR_NAME }}.azurecr.io/innovation-chat:latest \
+            .
+          
+          docker push ${{ env.ACR_NAME }}.azurecr.io/innovation-chat:${{ steps.vars.outputs.GITHUB_HASH }}
+          docker push ${{ env.ACR_NAME }}.azurecr.io/innovation-chat:latest
+
+      - name: Restart Frontend Web App
+        run: |
+          az webapp restart \
+            --name ${{ secrets.FRONTEND_WEB_APP_NAME }} \
+            --resource-group ${{ env.RESOURCE_GROUP }}
+
+      - name: Deployment Summary
+        run: |
+          echo "### ✅ Frontend Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Image:** \`${{ env.ACR_NAME }}.azurecr.io/innovation-chat:${{ steps.vars.outputs.GITHUB_HASH }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Web App:** \`${{ secrets.FRONTEND_WEB_APP_NAME }}\`" >> $GITHUB_STEP_SUMMARY

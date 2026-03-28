@@ -36,4 +36,4 @@ An Azure-native solution (AI Foundry, Container Apps, SQL, Key Vault) deployed v
 
 ### 🏢 Architecture  
 
-<img src="docs/Architecture.png" width="85%" height="100%">   
+<img src="docs/Architecture.png" width="100%" height="100%">   

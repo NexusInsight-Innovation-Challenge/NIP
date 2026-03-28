@@ -33,3 +33,7 @@ Solución nativa de Azure (AI Foundry, Container Apps, SQL, Key Vault) desplegad
 * **Entre los próximos pasos a seguir** se incluyen: 
     - Integración de Adpative Cards de **Microsoft Teams** para aprobaciones autónomas.
     - Uso de **Model Context Protocol (MCP)** para generar automáticamente reportes en Power BI y PDFs ejecutivos.
+
+### 🏢 Arquitectura  
+
+<img src="docs/Architecture.png" width="85%" height="100%">

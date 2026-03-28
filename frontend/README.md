@@ -121,7 +121,7 @@ $ az login --tenant <TENANT-ID> or az login --use-device-code --tenant <TENANT_I
 $ ./simple-deploy.md
 ```
 
-> Recomendación: en Azure usa secretos gestionados (Key Vault o secrets de Container Apps) para no exponer `AZURE_WEBPUBSUB_CONNECTION_STRING`.
+> Recomendación: en Azure usa secretos gestionados (Key Vault y/o secrets de Container Apps) para no exponer `AZURE_WEBPUBSUB_CONNECTION_STRING`.
 
 ## AZD (Azure Developer CLI)
 

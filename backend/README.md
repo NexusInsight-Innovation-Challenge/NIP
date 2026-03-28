@@ -121,7 +121,20 @@ Abrir:
 
 ---
 
-## 5) Cómo funciona en tiempo real
+## 5) Desplegar imagen a Azure Wep App for Continers de manera simple
+```bash
+# Cambiar modo al archivo simple-deploy.md
+$ chmod +x simple-deploy.md
+
+# Hacer login a azure con az CLI
+$ az login --tenant <TENANT-ID> or az login --use-device-code --tenant <TENANT_ID>
+
+# Ejecutar el script
+$ ./simple-deploy.md
+```
+> Recomendación: en Azure usa secretos gestionados (Key Vault o secrets de Container Apps) para no exponer `AZURE_WEBPUBSUB_CONNECTION_STRING`.
+
+## 6) Cómo funciona en tiempo real
 
 1. Frontend solicita token en `POST /api/negotiate`
 2. Frontend conecta WebSocket al URL firmado de Web PubSub
@@ -138,7 +151,7 @@ Abrir:
 
 ---
 
-## 6) API rápida
+## 7) API rápida
 
 - `GET /health`
 - `GET /ready`
